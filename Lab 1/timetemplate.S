@@ -54,7 +54,7 @@ timetemplate:
 	jal     display_string
 	
 	# wait a little
-	li	a0, -1		# ms
+	li	a0, 1000		# ms
 	jal	delay
 	
 	# call tick
