@@ -6,9 +6,9 @@
 	.globl hex2asc
 
 hex2asc:
-	li	a0, 9	# test number (from 0 to 15)
+	li	a0, 17	# test number (from 0 to 15)
 	
-	addi    sp,sp,-4
+	addi    sp,sp,-4	# push av ra
 	sw      ra,0(sp)
 	
 	jal	hexasc		# call hexasc
@@ -16,7 +16,7 @@ hex2asc:
 	li	a7, 11	# write a0 to stdout
 	ecall
 
-	lw      ra,0(sp)
+	lw      ra,0(sp)	# pop av ra
 	addi    sp,sp,4
 	jr      ra	
 
@@ -29,7 +29,7 @@ hexasc:
 	
 	andi	t3, a0, 0xF	# Find last nibble of a0, using bitwise and, and (1111)
 	
-	ble	t3, t2, startFromZero  # if t4 <=9
+	ble	t3, t2, startFromZero  # if t3 <= t2 (9)
 	
 	# else
 	add	a0, t3, t1
