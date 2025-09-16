@@ -16,7 +16,8 @@ void print_numbers(int n){
 }
 
 void print_sieves(int n){
-    int arr[n+1];
+    int *arr = (int*)malloc((n+1)*sizeof(int));
+
     for (int i = 0; i <= n;i++){
         arr[i] = 1;
     }
@@ -34,6 +35,8 @@ void print_sieves(int n){
             print_numbers(i);
         }
     }
+    
+    free(arr);
 }
 
 

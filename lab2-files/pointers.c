@@ -11,6 +11,19 @@
 
 char* text1 = "This is a string.";
 char* text2 = "Yet another thing.";
+int list1[20];
+int list2[20];
+int counter = 0;
+
+work(){
+
+}
+copycodes(){
+
+}
+
+
+
 
 void printlist(const int* lst){
   printf("ASCII codes and corresponding characters.\n");
