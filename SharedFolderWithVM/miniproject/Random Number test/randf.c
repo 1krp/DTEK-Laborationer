@@ -1,3 +1,5 @@
+#include "randf.h"
+
 
 int rand_num(int from, int to) {
     int diff = to - from ;
