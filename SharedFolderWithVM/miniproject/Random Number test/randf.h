@@ -1,1 +1,0 @@
-int rand_num(int from, int to);
