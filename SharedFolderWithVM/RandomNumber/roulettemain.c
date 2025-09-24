@@ -26,42 +26,31 @@ volatile unsigned short *TMR1_SNAPLO = (unsigned short*) 0x04000030;
 volatile unsigned short *TMR1_SNAPHI = (unsigned short*) 0x04000034;
 
 
-/* Below is the function that will be called when an interrupt is triggered. */
-void handle_interrupt(unsigned cause) 
-{
-  if (cause & 0x10){ // check if timer interrupt
-
-    *TMR1_SR = *TMR1_SR & 0xE; // clear TO bit
-  }
-}
-
-/* Add your code here for initializing interrupts. */
-void labinit(void)
-{ 
-  *(TMR1_PERLO) = (29999999/10) & 0xFFFF;
-  *(TMR1_PERHI) = (29999999/10) >> 16;
-
-  *(TMR1_CR) = 0x7; // start clock, enables ITO
-  enable_interrupts();
-}
-
-int getsnap(volatile unsigned short *SNAPLO){
-  return (int)(*SNAPLO);
-}
-
 int hash(int seed) {
     seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;
     seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;
     seed = (seed >> 16) ^ seed;
     return seed;
 }
+int randFT(int from, int to, int seed) {
+  int diff = to - from ; 
 
+  int randomNum = (seed % diff)+from;
+
+  return randomNum;
+}
 /* Your code goes into main as well as any needed functions. */
 int main() {
   //labinit();
+  int arr[11] = {0,0,0,0,0,0,0,0,0,0,0};
+  int randomNum = 0;
 
-  for(int i = 1; i < 30; i++){
-    printf("%d\n", hash(i));
+  for(int i=1; i < 30000; i++){
+    randomNum = randFT(1,11,hash(i));
+    arr[randomNum]++;
+  }
+  for(int i = 1; i < 11; i++){
+    printf("Number of %ds is %d\n",i, arr[i]);
   }
 
 }
