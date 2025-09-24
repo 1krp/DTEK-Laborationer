@@ -55,7 +55,7 @@ void print_sieves(int n){
 
     for (int i = 2; i <= n; i++){
         if (arr[i] == 1){
-            //print_numbers(i);
+            print_numbers(i);
         }
     }
 
