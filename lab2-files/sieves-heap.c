@@ -14,6 +14,7 @@ void print_numbers(int n){
     wrappAround = 0;
   }
 }
+int counter = 0;
 
 void print_sieves(int n){
     int *arr = (int*)malloc((n+1)*sizeof(int));
@@ -32,9 +33,11 @@ void print_sieves(int n){
 
     for (int i = 2; i <= n; i++){
         if (arr[i] == 1){
-            print_numbers(i);
+            //print_numbers(i);
+            counter++;
         }
     }
+    printf("number of primes: %d \n",counter);
     
     free(arr);
 }
