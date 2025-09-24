@@ -56,14 +56,20 @@ int hash(int seed) {
     return seed;
 }
 
-/* Your code goes into main as well as any needed functions. */
+int randFT(int from, int to) {
+  int seed = 0;
+  int diff = to - from ;
+  int snap = getsnap(TMR1_SNAPLO);
+  int seed = hash(snap);  
+
+  int randomNum = (seed % diff)+from;
+
+  return randomNum;
+}
+
 int main() {
   //labinit();
-
-  for(int i = 1; i < 30; i++){
-    printf("%d\n", hash(i));
-  }
-
+  randFT(1, 100); 
 }
 
 
