@@ -276,7 +276,7 @@ void labinit(void)
   *(TMR1_PERLO) = (29999999/10) & 0xFFFF;
   *(TMR1_PERHI) = (29999999/10) >> 16;
 
-  *(TMR1_CR) = 0x7; // start clock, enables ITO
+  *(TMR1_CR) = 0x7; // start clock, CONTINUE ,enables ITO
   enable_interrupts();
 }
 

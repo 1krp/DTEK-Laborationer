@@ -57,10 +57,9 @@ int hash(int seed) {
 }
 
 int randFT(int from, int to) {
-  int seed = 0;
   int diff = to - from ;
-  int snap = getsnap(TMR1_SNAPLO);
-  int seed = hash(snap);  
+  int seed = getsnap(TMR1_SNAPLO);
+  int hash = hash(seed);  
 
   int randomNum = (seed % diff)+from;
 
