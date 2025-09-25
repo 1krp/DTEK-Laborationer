@@ -22,21 +22,12 @@ volatile unsigned short *TMR1_SR = (unsigned short*) 0x04000020;
 volatile unsigned short *TMR1_CR = (unsigned short*) 0x04000024;
 volatile unsigned short *TMR1_PERLO = (unsigned short*) 0x04000028;
 volatile unsigned short *TMR1_PERHI = (unsigned short*) 0x0400002c;
+volatile unsigned short *TMR1_SNAPLO = (unsigned short*) 0x04000030;
+volatile unsigned short *TMR1_SNAPHI = (unsigned short*) 0x04000034;
 
 void set_leds(int led_mask){
   volatile int* ledPtr = 0x04000000;
   *ledPtr = led_mask;
-}
-
-void sec_leds(int led_mask){
-  volatile int* ledPtr = 0x04000000;
-
-  for (int i = 0; i < led_mask;i++){
-
-    delay(1100);
-
-    *ledPtr = i;
-  }
 }
 
 void reset_disp(){
@@ -114,8 +105,6 @@ int hr_counter = 0;
 
 void clock_counter(){
 
-  //delay(200);
-
   sec_counter++;
 
   if (sec_counter >= 60){
@@ -126,29 +115,6 @@ void clock_counter(){
     hr_counter ++;
     min_counter = 0;
   }
-}
-
-void display_time_tens(){
-  int sec_ones = 0;
-  int sec_tens = 0;
-  int min_ones = 0;
-  int min_tens = 0;
-  int hr_ones = 0;
-  int hr_tens = 0;
-
-  sec_ones = periods;
-  sec_tens = 0;
-  min_ones = sec_counter%10;
-  min_tens = sec_counter / 10;
-  hr_ones = min_counter%10;
-  hr_tens = min_counter / 10;
-
-  set_displays(1, sec_ones);
-  set_displays(2, sec_tens);
-  set_displays(3, min_ones);
-  set_displays(4, min_tens);
-  set_displays(5, hr_ones);
-  set_displays(6, hr_tens);
 }
 
 void display_time(){
@@ -185,24 +151,28 @@ int get_btn(){
   return 0x1 & *btnPtr;
 }
 
-int l = 1;
-int decrease = 0;
+int getsnap(){
+  *TMR1_SNAPLO = 0;
+  int low = *TMR1_SNAPLO;
+  return low;
+}
 
-void ledFun(){
-  set_leds(l);
+int hash(int seed) {
+    seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;
+    seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;
+    seed = (seed >> 16) ^ seed;
+    return seed;
+}
 
-  if (!decrease) {
-    l = l*2;
-  } else {
-    l = l/2;
-  }
+int randFT(int from, int to) {
+  int seed = 0;
+  int diff = to - from ;
+  int snap = getsnap();
+  seed = hash(snap);
 
-  if (l >= 512){
-    decrease = 1;
-  }
-  if (decrease && l <= 1) {
-    decrease = 0;
-  }
+  int randomNum = (seed % diff)+from;
+
+  return randomNum;
 }
 
 void roulette(){
@@ -213,14 +183,14 @@ void roulette(){
   int decr = 0;
   int counter = 0;
 
+  set_leds(lv);
+  delay(dv);
+
   while (spin){
     if (dv>300){spin = 0;}
     if(counter > 0 && counter%17 == 0){
-      dv*=2;
+      dv*=1.8;
     }
-
-    set_leds(lv);
-    delay(dv);
 
     if (!decr) {
       lv = lv*2;
@@ -235,21 +205,27 @@ void roulette(){
       decr = 0;
     }
     counter ++;
+    set_leds(lv);
+    delay(dv);
+  }
+
+  int sqrt_lv = 0;
+  while (lv > 1){
+    lv = lv/2;
+    sqrt_lv ++;
   }
 
   for (int i = 0; i < 5; i++){
     set_displays(1, 11);
-    set_displays(2, lv);
+    set_displays(2, sqrt_lv);
     set_displays(3, 11);
-    set_displays(4, lv);
+    set_displays(4, sqrt_lv);
     set_displays(5, 11);
-    set_displays(6, lv);
+    set_displays(6, sqrt_lv);
     delay(200);
     reset_disp();
     delay(200);
-  }
-
-  
+  } 
 }
 
 /* Below is the function that will be called when an interrupt is triggered. */
@@ -257,9 +233,9 @@ void handle_interrupt(unsigned cause)
 {
   if (cause & 0x10){ // check if timer interrupt
 
-    //display_time_tens();
-
     *TMR1_SR = *TMR1_SR & 0xE; // clear TO bit
+    *TMR1_SNAPLO = *TMR1_SNAPLO + 0x1;
+
     periods ++;
 
     if (periods==10){
@@ -290,4 +266,5 @@ int main() {
       roulette();
     }
   }
+
 }
