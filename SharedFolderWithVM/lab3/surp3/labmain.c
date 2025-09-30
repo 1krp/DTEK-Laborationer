@@ -18,16 +18,27 @@ extern int nextprime( int );
 int mytime = 0x0;
 char textstring[] = "text, more text, and even more text!";
 
+int prime = 1234567;
+
 volatile unsigned short *TMR1_SR = (unsigned short*) 0x04000020;
 volatile unsigned short *TMR1_CR = (unsigned short*) 0x04000024;
 volatile unsigned short *TMR1_PERLO = (unsigned short*) 0x04000028;
 volatile unsigned short *TMR1_PERHI = (unsigned short*) 0x0400002c;
-volatile unsigned short *TMR1_SNAPLO = (unsigned short*) 0x04000030;
-volatile unsigned short *TMR1_SNAPHI = (unsigned short*) 0x04000034;
 
 void set_leds(int led_mask){
   volatile int* ledPtr = 0x04000000;
   *ledPtr = led_mask;
+}
+
+void sec_leds(int led_mask){
+  volatile int* ledPtr = 0x04000000;
+
+  for (int i = 0; i < led_mask;i++){
+
+    delay(1100);
+
+    *ledPtr = i;
+  }
 }
 
 void reset_disp(){
@@ -82,20 +93,15 @@ void set_displays(int display_number, int value){
     *sevSegPtr = 0x90;
   }
   if (value == 10){
-    *sevSegPtr = 0xBF;
-  }
-  if (value == 11){
-    *sevSegPtr = 0xFF;
+    *sevSegPtr = 0xC0;
   }
 
   /*
-    When clock display: Show dots on display 5 and 3
+    Show dots on display 5 and 3
   */
-  /*
   if (display_number == 5 || display_number == 3){
     *sevSegPtr -= 0x80;
   } 
-  */
 }
 
 int periods = 0;
@@ -104,6 +110,8 @@ int min_counter = 0;
 int hr_counter = 0;
 
 void clock_counter(){
+
+  //delay(200);
 
   sec_counter++;
 
@@ -115,6 +123,29 @@ void clock_counter(){
     hr_counter ++;
     min_counter = 0;
   }
+}
+
+void display_time_tens(){
+  int sec_ones = 0;
+  int sec_tens = 0;
+  int min_ones = 0;
+  int min_tens = 0;
+  int hr_ones = 0;
+  int hr_tens = 0;
+
+  sec_ones = periods;
+  sec_tens = 0;
+  min_ones = sec_counter%10;
+  min_tens = sec_counter / 10;
+  hr_ones = min_counter%10;
+  hr_tens = min_counter / 10;
+
+  set_displays(1, sec_ones);
+  set_displays(2, sec_tens);
+  set_displays(3, min_ones);
+  set_displays(4, min_tens);
+  set_displays(5, hr_ones);
+  set_displays(6, hr_tens);
 }
 
 void display_time(){
@@ -151,91 +182,13 @@ int get_btn(){
   return 0x1 & *btnPtr;
 }
 
-int getsnap(){
-  *TMR1_SNAPLO = 0;
-  int low = *TMR1_SNAPLO;
-  return low;
-}
-
-int hash(int seed) {
-    seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;
-    seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;
-    seed = (seed >> 16) ^ seed;
-    return seed;
-}
-
-int randFT(int from, int to) {
-  int seed = 0;
-  int diff = to - from ;
-  int snap = getsnap();
-  seed = hash(snap);
-
-  int randomNum = (seed % diff)+from;
-
-  return randomNum;
-}
-
-void roulette(){
-
-  int spin = 1;
-  int lv =1;
-  int dv = 20;
-  int decr = 0;
-  int counter = 0;
-
-  set_leds(lv);
-  delay(dv);
-
-  while (spin){
-    if (dv>300){spin = 0;}
-    if(counter > 0 && counter%17 == 0){
-      dv*=1.8;
-    }
-
-    if (!decr) {
-      lv = lv*2;
-    } else {
-      lv = lv/2;
-    }
-
-    if (lv >= 512){
-      decr = 1;
-    }
-    if (decr && lv <= 1) {
-      decr = 0;
-    }
-    counter ++;
-    set_leds(lv);
-    delay(dv);
-  }
-
-  int sqrt_lv = 0;
-  while (lv > 1){
-    lv = lv/2;
-    sqrt_lv ++;
-  }
-
-  for (int i = 0; i < 5; i++){
-    set_displays(1, 11);
-    set_displays(2, sqrt_lv);
-    set_displays(3, 11);
-    set_displays(4, sqrt_lv);
-    set_displays(5, 11);
-    set_displays(6, sqrt_lv);
-    delay(200);
-    reset_disp();
-    delay(200);
-  } 
-}
-
 /* Below is the function that will be called when an interrupt is triggered. */
-void handle_interrupt(unsigned cause) 
-{
+void handle_interrupt(unsigned cause) {
   if (cause & 0x10){ // check if timer interrupt
 
-    *TMR1_SR = *TMR1_SR & 0xE; // clear TO bit
-    *TMR1_SNAPLO = *TMR1_SNAPLO + 0x1;
+    display_time_tens();
 
+    *TMR1_SR = *TMR1_SR & 0xFFFE; // clear TO bit
     periods ++;
 
     if (periods==10){
@@ -248,23 +201,23 @@ void handle_interrupt(unsigned cause)
 
 /* Add your code here for initializing interrupts. */
 void labinit(void)
-{
+{ 
   *(TMR1_PERLO) = (29999999/10) & 0xFFFF;
   *(TMR1_PERHI) = (29999999/10) >> 16;
 
-  *(TMR1_CR) = 0x7; // start clock, CONTINUE ,enables ITO
+  *(TMR1_CR) = 0x7; // start clock, enables ITO
   enable_interrupts();
 }
 
 /* Your code goes into main as well as any needed functions. */
 int main() {
   labinit();
-  reset_disp();
-
   while (1) {
-    if (get_btn()){
-      roulette();
-    }
+    print ("Prime: ");
+    prime = nextprime( prime );
+    print_dec( prime );
+    print("\n");
   }
-
 }
+
+
