@@ -59,16 +59,15 @@ int hash(int seed) {
 int randFT(int from, int to) {
   int diff = to - from ;
   int seed = getsnap(TMR1_SNAPLO);
-  int hash = hash(seed);  
 
-  int randomNum = (seed % diff)+from;
+  int randomNum = (hash(seed) % diff)+from;
 
   return randomNum;
 }
 
 int main() {
   //labinit();
-  randFT(1, 100); 
+  print_dec(randFT(1, 100)); 
 }
 
 
