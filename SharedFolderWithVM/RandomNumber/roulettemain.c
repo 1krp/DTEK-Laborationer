@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 
-
+// Thomas Wang's hash
 int hash(int seed) {
     seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;
     seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;

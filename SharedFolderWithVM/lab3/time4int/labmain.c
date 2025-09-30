@@ -25,6 +25,9 @@ volatile unsigned short *TMR1_CR = (unsigned short*) 0x04000024;
 volatile unsigned short *TMR1_PERLO = (unsigned short*) 0x04000028;
 volatile unsigned short *TMR1_PERHI = (unsigned short*) 0x0400002c;
 
+volatile int* swPtr = (volatile int*)0x04000010;
+volatile int* swIRQPt = (volatile int*)0x04000018;
+
 void set_leds(int led_mask){
   volatile int* ledPtr = 0x04000000;
   *ledPtr = led_mask;
@@ -104,7 +107,7 @@ void set_displays(int display_number, int value){
   } 
 }
 
-int periods = 0;
+int globalCounter = 0;
 int sec_counter = 0;
 int min_counter = 0;
 int hr_counter = 0;
@@ -133,7 +136,7 @@ void display_time_tens(){
   int hr_ones = 0;
   int hr_tens = 0;
 
-  sec_ones = periods;
+  sec_ones = globalCounter;
   sec_tens = 0;
   min_ones = sec_counter%10;
   min_tens = sec_counter / 10;
@@ -184,18 +187,27 @@ int get_btn(){
 
 /* Below is the function that will be called when an interrupt is triggered. */
 void handle_interrupt(unsigned cause) {
-  if (cause & 0x10){ // check if timer interrupt
-
-    display_time_tens();
+  if ((cause & 0x1F) == 0x10){ // check if timer interrupt
 
     *TMR1_SR = *TMR1_SR & 0xFFFE; // clear TO bit
-    periods ++;
+    globalCounter ++;
 
-    if (periods==10){
-      periods = 0;
+    if (globalCounter==10){
+      globalCounter = 0;
+
       clock_counter();
       tick (&mytime);
+
+      display_time();
     }
+  }
+
+  if((cause & 0x1F)==0x11){
+
+    delay(100);
+
+    tick(&mytime);
+
   }
 }
 
@@ -206,6 +218,9 @@ void labinit(void)
   *(TMR1_PERHI) = (29999999/10) >> 16;
 
   *(TMR1_CR) = 0x7; // start clock, enables ITO
+
+  *(swIRQPt) = 0x2; // enabels interupt for switch #1
+
   enable_interrupts();
 }
 
