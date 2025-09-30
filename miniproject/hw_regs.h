@@ -2,10 +2,8 @@
 #ifndef HW_REGS_H
 #define HW_REGS_H
 
-#include <stdint.h>
-
-#define REG32(addr)   (*(volatile uint32_t *)(addr))
-#define REG16(addr)   (*(volatile uint16_t *)(addr))
+#define REG32(addr)   (*(volatile int *)(addr))
+#define REG16(addr)   (*(volatile short *)(addr))
 
 // Timer
 #define TMR1_SR       REG16(0x04000020)

@@ -128,7 +128,7 @@ int main() {
   reset_disp();
 
   while (1) {
-
+    
     int showInt = randFT(0,9);
 
     if (get_btn()){
@@ -136,6 +136,8 @@ int main() {
       delay(50);
       //*btnPtr = 0xFFFE & *btnPtr;
       //set_leds(0x2);
+      //set_displays(0, showInt);
+      
       set_displays(0, showInt);
 
 
