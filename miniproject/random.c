@@ -1,3 +1,11 @@
+#include "hw_regs.h"
+
+int getsnap(){
+  TMR1_SNAPLO = 0;
+  int low = TMR1_SNAPLO;
+  return low;
+}
+
 int hash(int seed) {
     seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;
     seed = ((seed >> 16) ^ seed) * 0x45d9f3bu;

@@ -53,5 +53,5 @@ void roulette(){
     delay(200);
     reset_disp();
     delay(200);
-  } 
+  }
 }
