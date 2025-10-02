@@ -17,6 +17,7 @@
 
 // Switches
 #define SW            REG32(0x04000010)
+#define SW_DIR        REG32(0x04000014)
 #define SW_IRQ        REG32(0x04000018)
 #define SW_EDGE       REG32(0x0400001C)
 
