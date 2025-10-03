@@ -7,6 +7,7 @@
 
 /* Below functions are external and found in other files. */
 
+#include "main.h"
 #include "hw_regs.h"
 #include "roulette.h"
 
@@ -17,9 +18,10 @@ extern void time2string(char*,int);
 extern void delay(int);
 extern int nextprime( int );
 extern int randFT(int from, int to);
-//extern int roulette(int);
 
-int payroll = 0;
+static int payroll = 0;
+
+void set_payroll(int v) { payroll = v; }
 
 void set_leds(int mask){
   LEDS = mask;
@@ -81,6 +83,9 @@ void set_displays(int display_number, int value){
   if (value == 18){ // H
     sevSegVal = 0x89;
   }
+  if (value == 20){ // J
+    sevSegVal = 0xE1;
+  }
   if (value == 22){ // L
     sevSegVal = 0xC7;
   }
@@ -123,35 +128,47 @@ int get_btn(){
   return 0x1 & BTN;
 }
 
-/* Below is the function that will be called when an interrupt is triggered. */
-void handle_interrupt(unsigned cause) 
-{
-  if (cause & 0x10){            // check if timer interrupt
-    TMR1_SR = TMR1_SR & 0xE; 
-  }
-
-  if (cause == 0x11){           // check if switch interrupt
-    int edge = SW_EDGE ;      // read which switch caused the edge
-    SW_EDGE  = edge;          // clear it by writing 1s back
-    delay(100);
-    if (edge & 0x2) {           // check if switch #1 (bit1) caused it
-    }
-  }
-
-  if (cause == 0x12){            // check if btn1 interrupt
-    int inpEdge = BTN_EDGE;  // read which input caused the edge
-    BTN_EDGE = inpEdge;      // clear it by writing 1s back
-    delay(100);
-    if (inpEdge & 0x1) {        // check if btn1 (bit1) caused it
-    }
-  }
-}
-
 int makePayment(){
-  while(1){
+
+  int paymentDone = 0;
+
+  reset_disp();
+  set_displays(5, 26);  // P
+  set_displays(4, 11);  // A
+  set_displays(3, 34);  // Y
+  set_displays(0, 1);
+
+  while (!paymentDone) {
+
     if (get_btn()){
-      return get_sw();
+      delay(100);
+
+      while(!paymentDone){
+        if (get_btn()){
+          payroll = get_sw();
+          paymentDone = 1;
+        }
+      }
+      
+      reset_disp();
+      showPayroll();
+      print("Payment received: ");
+      print_dec(payroll);
+      print("\n");
+
+      delay(1000);
     }
+
+    /*
+      Show current switch number
+    */
+    int currentPayment = get_sw();
+    int currOnes = currentPayment%10;
+    int currTens = ((currentPayment-currOnes)%100)/10;
+    int currHundr = ((currentPayment-currOnes-currTens)%1000)/100;
+    set_displays(2, currHundr);
+    set_displays(1, currTens);
+    set_displays(0, currOnes);
   }
 }
 
@@ -215,12 +232,128 @@ void showMinus(int n){
   delay(1000);
 }
 
+void printBet(){
+  reset_disp();
+  set_displays(5, 8);   // B
+  set_displays(4, 15);  // E
+  set_displays(3, 30);  // T
+  delay(500);
+}
+
+void rouletteGameRun(){
+
+  printBet();
+
+  while(1){
+
+    if (get_btn()){
+      int newBet = get_sw();
+      print("Time for roulette!\n");
+      print("Your bet: ");
+      print_dec(newBet);
+      print("\n");
+      int win = roulette(newBet);
+
+      if (win > 0){
+        showPlus(win);
+        print("You win: ");
+        print_dec(win);
+        print("\n");
+        payroll += win;
+      } else {
+        showMinus(newBet);
+        print("You loose: ");
+        print_dec(newBet);
+        print("\n");
+        if (payroll - newBet > 0){
+          payroll -= newBet;
+        } else {
+          payroll = 0;
+        }
+      }
+      
+      /*
+        Show payroll
+      */
+      reset_disp();
+      showPayroll();
+      delay(2000);
+
+      /*
+        Place new bets
+      */
+      reset_disp();
+      set_displays(5, 8);   // B
+      set_displays(4, 15);  // E
+      set_displays(3, 30);  // T
+      delay(500);
+    }
+  }
+}
+
+void letsPlay(){
+
+  /*
+    Choose game
+  */
+  reset_disp();
+  set_displays(5, 1);
+  set_displays(0, 2);
+
+  while (1) {
+
+    if (get_btn()){
+      delay(100);
+
+      if (get_sw() == 1){ // Roulette choosed
+        rouletteGameRun();
+      }
+      if (get_sw() == 2){ // Black jack choosed
+
+      }
+    }
+  }
+}
+
+void resetGame(){
+  set_leds(0x0);
+  reset_disp();
+
+  letsPlay();
+}
+
+/* Below is the function that will be called when an interrupt is triggered. */
+void handle_interrupt(unsigned cause) 
+{
+  if (cause & 0x10){            // check if timer interrupt
+    TMR1_SR = TMR1_SR & 0xE; 
+  }
+
+  if (cause == 0x11){           // check if switch interrupt
+    int edge = SW_EDGE ;      // read which switch caused the edge
+    SW_EDGE  = edge;          // clear it by writing 1s back
+    delay(100);
+    if (edge & 0x200) {           // check if switch #10 (bit10) caused it
+      print("Reset game");
+      resetGame();
+    }
+  }
+
+  if (cause == 0x12){            // check if btn1 interrupt
+    int inpEdge = BTN_EDGE;  // read which input caused the edge
+    BTN_EDGE = inpEdge;      // clear it by writing 1s back
+    delay(100);
+    if (inpEdge & 0x1) {        // check if btn1 (bit1) caused it
+    }
+  }
+}
+
 /* Add your code here for initializing interrupts. */
 void init(void) {
   TMR1_PERLO = (29999999/10) & 0xFFFF;
   TMR1_PERHI = (29999999/10) >> 16;
   TMR1_CR    = 0x7;     // start clock, CONTINUE,enables ITO
-  SW_IRQ     = 0x2;     // enable switch IRQ
+  SW_IRQ     = 0x200;     // enable switch IRQ for switch # 10
   BTN_IRQ    = 0x1;     // enable button IRQ
   enable_interrupts();
 }
@@ -250,83 +383,6 @@ int main() {
     }
   }
 
-  /*
-    Pay-screen
-  */
-  reset_disp();
-  set_displays(0, 1);
-  set_displays(3, 34);
-  set_displays(4, 11);
-  set_displays(5, 26);
-  cont = 0;
-
-  while (!cont) {
-
-    if (get_btn()){
-      delay(100);
-
-      payroll = makePayment();
-      
-      reset_disp();
-      showPayroll();
-      print_dec(payroll);
-
-      delay(1000);
-
-      cont = 1;
-    }
-  }
-
-  reset_disp();
-  set_displays(5, 8);   // B
-  set_displays(4, 15);  // E
-  set_displays(3, 30);  // T
-  delay(500);
-
-  while(1){
-
-    if (get_btn()){
-      int newBet = get_sw();
-      print("Time for roulette!\n");
-      print("Your bet: ");
-      print_dec(newBet);
-      print("\n");
-      int win = roulette(newBet);
-
-      if (win > 0){
-        showPlus(win);
-        print("You win: ");
-        print_dec(win);
-        print("\n");
-        payroll += win;
-      } else {
-        showMinus(newBet);
-        print("You loose: ");
-        print_dec(newBet);
-        print("\n");
-        if (payroll - newBet > 0){
-          payroll -= newBet;
-        } else {
-          payroll = 0;
-        }
-        
-      }
-      
-      /*
-        Show payroll
-      */
-      reset_disp();
-      showPayroll();
-      delay(2000);
-
-      /*
-        Place new bets
-      */
-      reset_disp();
-      set_displays(5, 8);   // B
-      set_displays(4, 15);  // E
-      set_displays(3, 30);  // T
-      delay(500);
-    }
-  }
+  makePayment();
+  letsPlay();
 }

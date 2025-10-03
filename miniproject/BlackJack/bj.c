@@ -1,4 +1,4 @@
-
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -6,9 +6,7 @@
 #define HAND_SIZE 10
 #define DECK_SIZE 52
 
-/*
-Holds index of the card to be dealt next in the deck
-*/
+//Holds index of the card to be dealt next in the deck
 int topOfDeck = 0;
 
 int pHandValue = 0;
@@ -27,9 +25,8 @@ Card create_card(char *suit, int value) {
     new_card.value = value;
     return new_card;
 }
-/*
-Initializes a deck of DECK_SIZE empty cards
-*/
+
+//Initializes a deck of DECK_SIZE empty cards
 Card *init_deck() {
     static Card deck[DECK_SIZE];
     for (int i = 0; i < DECK_SIZE; i++) {
@@ -38,9 +35,8 @@ Card *init_deck() {
     }
     return deck;
 }
-/*
-Initializes a hand of 3 empty cards
-*/
+
+//Initializes a hand of 3 empty cards
 
 void init_hand(Card *hand, int size) {
     for (int i = 0; i < size; i++) {
@@ -175,3 +171,4 @@ int main() {
 
     return 0;
 }
+*/

@@ -1,4 +1,5 @@
 #include "roulette.h"
+#include "main.h"
 
 extern void delay(int);
 extern void set_leds(int led_mask);
@@ -43,7 +44,7 @@ int roulette(int bet){
     Start game
   */
   print("Let's play!\n");
-  delay(2000);
+  delay(500);
   showStartRound();
 
   /*
@@ -79,6 +80,9 @@ int roulette(int bet){
     win = bet*2;
   }
 
+  //if (win)
+  //set_payroll(get_payroll() + win);
+
   return win;
 }
 
@@ -89,12 +93,10 @@ void makeBet(){
     Odd or even
   */
   reset_disp();
-  set_displays(5, 0);
-  set_displays(4, 1);
-  set_displays(3, 15);
-  set_displays(2, 2);
-  set_displays(1, 35);
-  set_displays(0, 0);
+  set_displays(5, 0);   // O (Odd)
+  set_displays(4, 1);   // 1
+  set_displays(1, 15);  // E (Even)
+  set_displays(0, 2);   // 2
   delay(500);
 
   while(!choiceMade){
@@ -109,7 +111,7 @@ void makeBet(){
         even = 1;
         choiceMade = 1;
       }
-      if (choice == 512){
+      if (choice == 0){
         choiceMade = 1;
       }
     }
