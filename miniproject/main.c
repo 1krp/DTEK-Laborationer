@@ -203,6 +203,7 @@ int makeBet(){
         return newBet;
       } else {
         print("Not enough money");
+        delay(500);
       }
     }
 
@@ -286,7 +287,7 @@ void rouletteGameRun(){
   while(!resetGame){
 
     print("New round!\n");
-    delay(1000);
+    delay(100);
     int currBet = 0;
 
     print("Make bet");
@@ -340,7 +341,6 @@ void letsPlay(){
 
     if (get_btn()){
       delay(100);
-
       if (get_sw() == 1){ // Roulette choosed
         rouletteGameRun();
       }

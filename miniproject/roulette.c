@@ -9,6 +9,8 @@ extern void print(const char*);
 extern void print_dec(unsigned int);
 extern int get_btn(void);
 extern int get_sw(void);
+extern int randFT(int from, int to);
+extern int nextprime( int );
 
 /*
   Roulette globals
@@ -130,7 +132,6 @@ void pickBets(){
   set_displays(5, 1);
   set_displays(4, 36);
   set_displays(3, 9);
-  set_displays(0, 0);
   delay(500);
 
   choiceMade = 0;
@@ -147,6 +148,12 @@ void pickBets(){
         choiceMade = 1;
       }
     }
+
+    /*
+      Show current switch number
+    */
+    int currentChoice = get_sw()%10;
+    set_displays(0, currentChoice);
   }
 
   if (num<10){
@@ -161,41 +168,87 @@ void pickBets(){
 
 int spinWheel(){
 
-  int spin = 1;
-  int led_v = 1;
-  int del_v = 20;
-  int decr = 0;
+  int wheelSpins = 1;
+  int randModHi = nextprime(randFT(10,20));
+  int randModLo = randFT(3,7);
+  int lampV = 1;
+  int delayT = 20;
+  int goRight = 0;
   int counter = 0;
 
-  set_leds(led_v);
-  delay(del_v);
+  /*
+    Display bets
+  */
+  if (odd == 1){
+    set_displays(1, 0);
+  } else if (even == 1) {
+    set_displays(1, 15);
+  } else {
+    set_displays(1, 36);
+  }
+  if (num < 10) {
+    set_displays(0, num);
+  } else {
+    set_displays(0, 36);
+  }
 
-  while (spin){
-    if (del_v>300){spin = 0;}
-    if(counter > 0 && counter%17 == 0){
-      del_v*=1.8;
+  set_leds(lampV);
+  delay(delayT);
+
+  while (wheelSpins){
+
+    /*
+      If delay time reaches 300 -> stop wheel
+    */
+    if (delayT>250){wheelSpins = 0;}
+
+    /*
+      Increase delay time on random modulo
+    */
+    if(counter > 0 && counter%randModHi == 0){
+      delayT*=1.5;
     }
 
-    if (!decr) {
-      led_v = led_v*2;
+    /*
+      Increase delay time faster on larger delay times
+    */
+    if(delayT > 150 && counter%randModHi == 0){
+      delayT*=1.8;
+    }
+    if(delayT > 200 && counter%randModLo == 0){
+      delayT*=2;
+    }
+
+    /*
+      Go right/left logic
+    */
+    if (!goRight) {
+      lampV = lampV*2;
     } else {
-      led_v = led_v/2;
+      lampV = lampV/2;
+    }
+    if (lampV >= 512){
+      goRight = 1;
+    }
+    if (goRight && lampV <= 1) {
+      goRight = 0;
     }
 
-    if (led_v >= 512){
-      decr = 1;
-    }
-    if (decr && led_v <= 1) {
-      decr = 0;
-    }
+    /*
+      Increase counter every loop
+    */
     counter ++;
-    set_leds(led_v);
-    delay(del_v);
+
+    /*
+      Switch to next lamp and wait delay ms
+    */
+    set_leds(lampV);
+    delay(delayT);
   }
 
   int sqrt_lv = 0;
-  while (led_v > 1){
-    led_v = led_v/2;
+  while (lampV > 1){
+    lampV = lampV/2;
     sqrt_lv ++;
   }
 
