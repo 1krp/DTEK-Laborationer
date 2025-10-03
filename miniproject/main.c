@@ -286,6 +286,7 @@ void rouletteGameRun(){
   while(!resetGame){
 
     print("New round!\n");
+    delay(1000);
     int currBet = 0;
 
     print("Make bet");
@@ -303,9 +304,14 @@ void rouletteGameRun(){
       print("No wins..\n");
     }
 
+    /*
+      Reset leds
+    */
+    set_leds(0x0);
     reset_disp();
-    int playAgain = 0;
+    print("Rond finished\n");
 
+    int playAgain = 0;
     while (!playAgain){
 
       /*
@@ -314,15 +320,11 @@ void rouletteGameRun(){
       showPayroll();
 
       if (get_btn()){
+        print("Play again\n");
         playAgain = 1;
       }
     }
   }
-
-  /*
-    Game has been reset
-  */
-  set_leds(0x0);
 }
 
 void letsPlay(){
