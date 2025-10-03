@@ -20,6 +20,7 @@ extern int nextprime( int );
 extern int randFT(int from, int to);
 
 static int payroll = 0;
+static int resetGame = 0;
 
 void set_payroll(int v) { payroll = v; }
 
@@ -128,7 +129,7 @@ int get_btn(){
   return 0x1 & BTN;
 }
 
-int makePayment(){
+void makePayment(){
 
   int paymentDone = 0;
 
@@ -166,6 +167,52 @@ int makePayment(){
     int currOnes = currentPayment%10;
     int currTens = ((currentPayment-currOnes)%100)/10;
     int currHundr = ((currentPayment-currOnes-currTens)%1000)/100;
+    set_displays(2, currHundr);
+    set_displays(1, currTens);
+    set_displays(0, currOnes);
+  }
+}
+
+void displayBet(){
+  reset_disp();
+  set_displays(5, 8);   // B
+  set_displays(4, 15);  // E
+  set_displays(3, 30);  // T
+}
+
+int makeBet(){
+
+  int newBet = 0;
+
+  displayBet();
+
+  while (1) {
+
+    if (get_btn()){
+      newBet = get_sw();
+
+      if (newBet <= payroll){
+
+        reset_disp();
+        print("Your bet: ");
+        print_dec(newBet);
+        print("\n");
+        delay(1000);
+
+        payroll -= newBet;
+        return newBet;
+      } else {
+        print("Not enough money");
+      }
+    }
+
+    /*
+      Show current switch number
+    */
+    int currentBet = get_sw();
+    int currOnes = currentBet%10;
+    int currTens = ((currentBet-currOnes)%100)/10;
+    int currHundr = ((currentBet-currOnes-currTens)%1000)/100;
     set_displays(2, currHundr);
     set_displays(1, currTens);
     set_displays(0, currOnes);
@@ -232,75 +279,62 @@ void showMinus(int n){
   delay(1000);
 }
 
-void printBet(){
-  reset_disp();
-  set_displays(5, 8);   // B
-  set_displays(4, 15);  // E
-  set_displays(3, 30);  // T
-  delay(500);
-}
-
 void rouletteGameRun(){
 
-  printBet();
+  print("Time for roulette!\n");
 
-  while(1){
+  while(!resetGame){
 
-    if (get_btn()){
-      int newBet = get_sw();
-      print("Time for roulette!\n");
-      print("Your bet: ");
-      print_dec(newBet);
+    print("New round!\n");
+    int currBet = 0;
+
+    print("Make bet");
+    currBet = makeBet();
+
+    int win = roulette(currBet);
+
+    if (win > 0){
+      showPlus(win);
+      payroll += win;
+      print("You win: ");
+      print_dec(win);
       print("\n");
-      int win = roulette(newBet);
+    } else {
+      print("No wins..\n");
+    }
 
-      if (win > 0){
-        showPlus(win);
-        print("You win: ");
-        print_dec(win);
-        print("\n");
-        payroll += win;
-      } else {
-        showMinus(newBet);
-        print("You loose: ");
-        print_dec(newBet);
-        print("\n");
-        if (payroll - newBet > 0){
-          payroll -= newBet;
-        } else {
-          payroll = 0;
-        }
-      }
-      
+    reset_disp();
+    int playAgain = 0;
+
+    while (!playAgain){
+
       /*
         Show payroll
       */
-      reset_disp();
       showPayroll();
-      delay(2000);
 
-      /*
-        Place new bets
-      */
-      reset_disp();
-      set_displays(5, 8);   // B
-      set_displays(4, 15);  // E
-      set_displays(3, 30);  // T
-      delay(500);
+      if (get_btn()){
+        playAgain = 1;
+      }
     }
   }
+
+  /*
+    Game has been reset
+  */
+  set_leds(0x0);
 }
 
 void letsPlay(){
 
-  /*
-    Choose game
-  */
-  reset_disp();
-  set_displays(5, 1);
-  set_displays(0, 2);
-
   while (1) {
+
+    /*
+      Choose game
+    */
+    reset_disp();
+    set_displays(5, 1);
+    set_displays(0, 2);
 
     if (get_btn()){
       delay(100);
@@ -311,15 +345,9 @@ void letsPlay(){
       if (get_sw() == 2){ // Black jack choosed
 
       }
+      resetGame = 0; // Unreset reset button
     }
   }
-}
-
-void resetGame(){
-  set_leds(0x0);
-  reset_disp();
-
-  letsPlay();
 }
 
 /* Below is the function that will be called when an interrupt is triggered. */
@@ -335,7 +363,7 @@ void handle_interrupt(unsigned cause)
     delay(100);
     if (edge & 0x200) {           // check if switch #10 (bit10) caused it
       print("Reset game");
-      resetGame();
+      resetGame = 1;
     }
   }
 

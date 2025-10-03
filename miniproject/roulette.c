@@ -36,9 +36,9 @@ int roulette(int bet){
   int win = 0;
 
   /*
-    Pick bets
+    Make bet
   */
-  makeBet();
+  pickBets();
 
   /*
     Start game
@@ -80,13 +80,10 @@ int roulette(int bet){
     win = bet*2;
   }
 
-  //if (win)
-  //set_payroll(get_payroll() + win);
-
   return win;
 }
 
-void makeBet(){
+void pickBets(){
   int choiceMade = 0;
 
   /*
