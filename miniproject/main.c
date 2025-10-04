@@ -22,7 +22,13 @@ extern int randFT(int from, int to);
 static int payroll = 0;
 static int resetGame = 0;
 
+static int timerTOCounter = 0;
+static int secondCounter = 0;
+
 void set_payroll(int v) { payroll = v; }
+
+void set_seconds(int v) { secondCounter = v; }
+int get_seconds(){return secondCounter;}
 
 void set_leds(int mask){
   LEDS = mask;
@@ -357,6 +363,12 @@ void handle_interrupt(unsigned cause)
 {
   if (cause & 0x10){            // check if timer interrupt
     TMR1_SR = TMR1_SR & 0xE; 
+    timerTOCounter ++;
+
+    if (timerTOCounter >= 10){
+      timerTOCounter = 0;
+      secondCounter ++;
+    }
   }
 
   if (cause == 0x11){           // check if switch interrupt

@@ -169,10 +169,8 @@ void pickBets(){
 int spinWheel(){
 
   int wheelSpins = 1;
-  int randModHi = nextprime(randFT(10,20));
-  int randModLo = randFT(3,7);
   int lampV = 1;
-  int delayT = 20;
+  int delayT = randFT(15,25);
   int goRight = 0;
   int counter = 0;
 
@@ -192,6 +190,8 @@ int spinWheel(){
     set_displays(0, 36);
   }
 
+  set_seconds(0);
+
   set_leds(lampV);
   delay(delayT);
 
@@ -200,24 +200,7 @@ int spinWheel(){
     /*
       If delay time reaches 300 -> stop wheel
     */
-    if (delayT>250){wheelSpins = 0;}
-
-    /*
-      Increase delay time on random modulo
-    */
-    if(counter > 0 && counter%randModHi == 0){
-      delayT*=1.5;
-    }
-
-    /*
-      Increase delay time faster on larger delay times
-    */
-    if(delayT > 150 && counter%randModHi == 0){
-      delayT*=1.8;
-    }
-    if(delayT > 200 && counter%randModLo == 0){
-      delayT*=2;
-    }
+    if (delayT>210){wheelSpins = 0;}
 
     /*
       Go right/left logic
@@ -235,15 +218,15 @@ int spinWheel(){
     }
 
     /*
-      Increase counter every loop
-    */
-    counter ++;
-
-    /*
       Switch to next lamp and wait delay ms
     */
     set_leds(lampV);
     delay(delayT);
+
+    /*
+      Increase delay time
+    */
+    delayT += 1.1*get_seconds();
   }
 
   int sqrt_lv = 0;
