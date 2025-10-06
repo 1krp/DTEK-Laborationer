@@ -10,6 +10,7 @@
 #include "main.h"
 #include "hw_regs.h"
 #include "roulette.h"
+#include "bj.h"
 
 extern void print(const char*);
 extern void print_dec(unsigned int);
@@ -84,6 +85,9 @@ void set_displays(int display_number, int value){
   if (value == 11){ // A
     sevSegVal = 0x88;
   }
+  if (value == 14){ // d
+    sevSegVal = 0xA1;
+  }
   if (value == 15){ // E
     sevSegVal = 0x86;
   }
@@ -96,11 +100,14 @@ void set_displays(int display_number, int value){
   if (value == 22){ // L
     sevSegVal = 0xC7;
   }
+  if (value == 24){ // N
+    sevSegVal = 0xC8;
+  }
   if (value == 26){ // P
     sevSegVal = 0x8C;
   }
   if (value == 30){ // T
-    sevSegVal = 0xCE;
+    sevSegVal = 0x8F;
   }
   if (value == 34){ // Y
     sevSegVal = 0x8D;
@@ -286,6 +293,60 @@ void showMinus(int n){
   delay(1000);
 }
 
+void blackjackGameRun(){
+
+  print("Time for bj!\n");
+
+  while(!resetGame){
+
+    print("New round!\n");
+    delay(100);
+    int currBet = 0;
+
+    print("Make bet");
+    currBet = makeBet();
+
+    int bjResult = bjGameLoop();
+
+    if (bjResult == 1){
+      payroll += currBet*2;
+      print("You win: ");
+      print_dec(currBet*2);
+      print("\n");
+    } else if (bjResult == 3){
+      payroll += currBet;
+      print("Push: ");
+      print_dec(currBet);
+      print("\n");
+    } else {
+      print("No win..\n");
+    }
+
+    /*
+      Reset leds
+    */
+    set_leds(0x0);
+    reset_disp();
+    print("Rond finished\n");
+
+    int playAgain = 0;
+    while (!playAgain){
+
+      /*
+        Show payroll
+      */
+      showPayroll();
+
+      if (get_btn()){
+        print("Play again\n");
+        playAgain = 1;
+      }
+    }
+  }
+
+
+}
+
 void rouletteGameRun(){
 
   print("Time for roulette!\n");
@@ -351,7 +412,7 @@ void letsPlay(){
         rouletteGameRun();
       }
       if (get_sw() == 2){ // Black jack choosed
-
+        blackjackGameRun();
       }
       resetGame = 0; // Unreset reset button
     }

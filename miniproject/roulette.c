@@ -129,7 +129,7 @@ void pickBets(){
     One number
   */
   reset_disp();
-  set_displays(5, 1);
+  set_displays(5, 0);
   set_displays(4, 36);
   set_displays(3, 9);
   delay(500);
@@ -138,12 +138,11 @@ void pickBets(){
 
   while(!choiceMade){
     if (get_btn()){
-      int choice = get_sw();
+      int choice = get_sw()%10;
 
-      if (choice < 10){
-        num = choice;
-        choiceMade = 1;
-      }
+      num = choice;
+      choiceMade = 1;
+
       if (choice == 512){
         choiceMade = 1;
       }
@@ -170,7 +169,7 @@ int spinWheel(){
 
   int wheelSpins = 1;
   int lampV = 1;
-  int delayT = randFT(15,25);
+  int delayT = randFT(10,50);
   int goRight = 0;
   int counter = 0;
 
@@ -226,7 +225,7 @@ int spinWheel(){
     /*
       Increase delay time
     */
-    delayT += 1.1*get_seconds();
+    delayT += 1.07*get_seconds();
   }
 
   int sqrt_lv = 0;
