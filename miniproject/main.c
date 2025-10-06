@@ -122,9 +122,6 @@ void set_displays(int display_number, int value){
   if (value == 36){ // "-"
     sevSegVal = 0xBF;
   }
-  if (value == 37){ // "+"
-    sevSegVal = 0xB9;
-  }
 
   /*
     Set value to chosen display
@@ -157,20 +154,14 @@ void makePayment(){
     if (get_btn()){
       delay(100);
 
-      while(!paymentDone){
-        if (get_btn()){
-          payroll = get_sw();
-          paymentDone = 1;
-        }
-      }
+      payroll = get_sw();
+      paymentDone = 1;
       
       reset_disp();
       showPayroll();
       print("Payment received: ");
       print_dec(payroll);
       print("\n");
-
-      delay(1000);
     }
 
     /*
@@ -263,47 +254,21 @@ void showPlus(int n){
     set_displays(1, tens);
     set_displays(2, hundr);
     set_displays(3, thousn);
-
-    set_displays(4, 36);
-    set_displays(5, 37);
-  }
-  delay(1000);
-}
-
-void showMinus(int n){
-
-  int ones = n%10;
-  int tens = ((n-ones)%100)/10;
-  int hundr = ((n-ones-tens)%1000)/100;
-  int thousn = ((n-ones-tens-hundr)%10000)/1000;
-
-  for (int i = 0; i < 3; i++){
-
-    delay(400);
-    reset_disp();
-    delay(400);
-
-    set_displays(0, ones);
-    set_displays(1, tens);
-    set_displays(2, hundr);
-    set_displays(3, thousn);
-
-    set_displays(4, 36);
   }
   delay(1000);
 }
 
 void blackjackGameRun(){
 
-  print("Time for bj!\n");
+  print("Time for bj!\n\n");
 
   while(!resetGame){
 
-    print("New round!\n");
+    print("New round!\n\n");
     delay(100);
     int currBet = 0;
 
-    print("Make bet");
+    print("-- Make bet -- \n\n");
     currBet = makeBet();
 
     int bjResult = bjGameLoop();
@@ -319,7 +284,7 @@ void blackjackGameRun(){
       print_dec(currBet);
       print("\n");
     } else {
-      print("No win..\n");
+      print("No win..\n\n");
     }
 
     /*
@@ -327,7 +292,7 @@ void blackjackGameRun(){
     */
     set_leds(0x0);
     reset_disp();
-    print("Rond finished\n");
+    print("Round finished\n");
 
     int playAgain = 0;
     while (!playAgain){
@@ -343,21 +308,19 @@ void blackjackGameRun(){
       }
     }
   }
-
-
 }
 
 void rouletteGameRun(){
 
-  print("Time for roulette!\n");
+  print("Time for roulette!\n\n");
 
   while(!resetGame){
 
-    print("New round!\n");
+    print("New round!\n\n");
     delay(100);
     int currBet = 0;
 
-    print("Make bet");
+    print("-- Make bet -- \n\n");
     currBet = makeBet();
 
     int win = roulette(currBet);
@@ -369,7 +332,7 @@ void rouletteGameRun(){
       print_dec(win);
       print("\n");
     } else {
-      print("No wins..\n");
+      print("No wins..\n\n");
     }
 
     /*
@@ -377,7 +340,7 @@ void rouletteGameRun(){
     */
     set_leds(0x0);
     reset_disp();
-    print("Rond finished\n");
+    print("Round finished\n\n");
 
     int playAgain = 0;
     while (!playAgain){
@@ -397,14 +360,14 @@ void rouletteGameRun(){
 
 void letsPlay(){
 
-  while (1) {
-
-    /*
+  /*
       Choose game
-    */
-    reset_disp();
-    set_displays(5, 1);
-    set_displays(0, 2);
+  */
+  reset_disp();
+  set_displays(5, 1);
+  set_displays(0, 2);
+
+  while (1) {
 
     if (get_btn()){
       delay(100);
@@ -437,7 +400,7 @@ void handle_interrupt(unsigned cause)
     SW_EDGE  = edge;          // clear it by writing 1s back
     delay(100);
     if (edge & 0x200) {           // check if switch #10 (bit10) caused it
-      print("Reset game");
+      print("Reset game\n");
       resetGame = 1;
     }
   }

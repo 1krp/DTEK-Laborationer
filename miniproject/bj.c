@@ -85,9 +85,14 @@ void shuffle_deck(Card *deck) {
         deck[j] = deck[i];
         deck[i] = temp;
     }
+
+    print("Deck is shuffled!\n\n");
 }
 
 void init_game(Card *pHand, Card *dHand, Card *deck) {
+
+    print("Initializes game.\n\n");
+
     init_hand(pHand);
     init_hand(dHand);
     
@@ -100,8 +105,12 @@ void init_game(Card *pHand, Card *dHand, Card *deck) {
     dHandValue = 0;
     roundStatus = 0;
 
+    print("Player start hand: \n");
     deal_card(deck, pHand, 2);
+
+    print("Dealer start hand: \n");
     deal_card(deck, dHand, 2);
+    print("\n");
 }
 
 void new_round(Card *pHand, Card *dHand, Card *deck) {
@@ -122,20 +131,26 @@ void new_round(Card *pHand, Card *dHand, Card *deck) {
 void deal_card(Card *deck, Card *hand, int numOfCards) {
     int dealtCardsCounter = 0;
 
-        for(int i = 0; i < 10; i++){
-            if(hand[i].value == 0 && dealtCardsCounter < numOfCards){
-                hand[i].suit = deck[topOfDeck].suit;
-                hand[i].value = deck[topOfDeck].value;
-                topOfDeck++;
-                dealtCardsCounter++;
-            }
+    for(int i = 0; i < 10; i++){
+        if(hand[i].value == 0 && dealtCardsCounter < numOfCards){
+            hand[i].suit = deck[topOfDeck].suit;
+            hand[i].value = deck[topOfDeck].value;
+            topOfDeck++;
+            dealtCardsCounter++;
+
+            // Print drawn card
+            print("Drawn card: ");
+            print(hand[i].suit);
+            print(" ");
+            print_dec(hand[i].value);
+            print("\n");
         }
+    }
 }
 
 void print_cards(Card *hand, int size) {
     for (int i = 0; i < size; i++) {
         if (hand[i].value !=0) {
-            //printf("Card %d: %s %d\n", i + 1, hand[i].suit, hand[i].value);
             print("Card ");
             print_dec(i + 1);
             print(": ");
@@ -183,23 +198,24 @@ void dealer_turn(Card *deck, Card *dHand) {
 
 void round_status(){
     if (pStand){
-        if (dHandValue > pHandValue) {
-            roundStatus = 2;
+        if (pHandValue > dHandValue){
+            roundStatus = 2; // player wins
+        }
+        if (dHandValue > pHandValue && dHandValue <= 21) {
+            roundStatus = 2; // dealer win
         }
         if (dHandValue == pHandValue) {
-            roundStatus = 3;
+            roundStatus = 3; // push
         }
     }
     if (pHandValue > 21) {
         roundStatus = 2; // dealer win
     } else if (dHandValue > 21) {
         roundStatus = 1; // player win
-    } else if (pHandValue == dHandValue && pHandValue >= 17) {
+    } else if (dHandValue >= 17 && pHandValue == dHandValue) {
         roundStatus = 3; // push
-    } else if (pHandValue >= 17 && pHandValue > dHandValue) {
+    } else if (dHandValue >= 17 && pHandValue > dHandValue) {
         roundStatus = 1; // player win
-    } else if (dHandValue >= 17 && dHandValue > pHandValue) {
-        roundStatus = 2; // dealer win
     }
 }
 
@@ -217,7 +233,21 @@ Card deck[DECK_SIZE];
 Card pHand[HAND_SIZE];
 Card dHand[HAND_SIZE];
 
-int bjGameLoop() { 
+int bjGameLoop() {
+
+    print("Let's play!\n\n");
+
+    /*
+        Wait for player to start (push btn)
+    */
+    int started = 0;
+    while (!started){
+        if (get_btn()){
+            delay(100);
+            started = 1;
+        }
+    }
+
     init_game(pHand, dHand, deck);
 
     pHandValue = count_hand_value(pHand, HAND_SIZE);
@@ -237,13 +267,16 @@ int bjGameLoop() {
     while (roundStatus == 0) {
 
         if (!pStand){
-            int choose = 0;
+
+            print("Players turn: \n");
+
+            int chosen = 0;
             int choice = 0;
 
-            while (!choose){
+            while (!chosen){
                 if (get_btn()){
                     choice = get_sw()%2;
-                    choose = 1;
+                    chosen = 1;
                 }
 
                 /*
@@ -264,14 +297,29 @@ int bjGameLoop() {
             }
 
             if (choice == 1){ // Hit
+                print("Player hits.\n");
                 deal_card(deck,pHand,1);
+
+                pHandValue = count_hand_value(pHand, HAND_SIZE);
+
+                print("Players new hand value: ");
+                print_dec(pHandValue);
+                print("\n\n");
             } else if (choice == 2){ // Stand
+                print("Player stands.\n\n");
                 pStand = 1;
             }
         }        
             
         if (dHandValue < 17){
+            print("Dealers turn: \n");
             deal_card(deck, dHand, 1);
+
+            dHandValue = count_hand_value(dHand, HAND_SIZE);
+
+            print("Dealers new hand value: ");
+            print_dec(dHandValue);
+            print("\n\n");
         }
 
         print_cards(pHand, HAND_SIZE);
