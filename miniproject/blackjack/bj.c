@@ -99,11 +99,11 @@ void fill_deck(Card *deck) {
 }
 // fisher-yates-shuffling
 void shuffle_deck(Card *deck) {
-    int n = 52;
+    int n = DECK_SIZE;
     Card temp;
 
-    for (int i = n - 1; i > 0; i--) {
-        int j = randFT(1, 52);
+    for (int i = n - 1; i > 0; --i) {
+        int j = randFT(1, i);
         temp = deck[j];
         deck[j] = deck[i];
         deck[i] = temp;
@@ -166,6 +166,7 @@ void deal_card(Card *deck, Card *hand, int numOfCards) {
         if(hand[i].value == 0 && dealtCardsCounter < numOfCards){
             hand[i].suit = deck[topOfDeck].suit;
             hand[i].value = deck[topOfDeck].value;
+            
             topOfDeck++;
             dealtCardsCounter++;
 
