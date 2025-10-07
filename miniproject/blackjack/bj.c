@@ -52,6 +52,10 @@ int dY = 40;
 
 int cardOffset[10] = {0,1,-1,2,-2,3,-3,4,-4,5};
 
+Card deck[DECK_SIZE];
+Card pHand[HAND_SIZE];
+Card dHand[HAND_SIZE];
+
 Card create_card(char *suit, int value) {
     Card new_card;
     new_card.suit = suit;
@@ -298,6 +302,9 @@ Returns the x cordinate to where the card should be printed, to a given handsize
 int cardXOffset(int cardCounter) {
     return 132+29*cardOffset[cardCounter-1];
 }
+
+
+
 /*
 "Flips" the dealers cards, a loop that Displays all the dealercards on the display.
 */
@@ -307,9 +314,6 @@ void displayDealersCards(){
     }
 }
 
-Card deck[DECK_SIZE];
-Card pHand[HAND_SIZE];
-Card dHand[HAND_SIZE];
 /*
 The main game loop, called from main.c
 */
