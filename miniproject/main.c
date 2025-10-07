@@ -12,36 +12,55 @@
 #include "roulette/roulette.h"
 #include "blackjack/bj.h"
 #include "display.h"
+#include "graphics/bgPxArrays.h"
 
 extern void print(const char*);
 extern void print_dec(unsigned int);
-extern void display_string(char*);
-extern void time2string(char*,int);
 extern void delay(int);
 extern int nextprime( int );
 extern int randFT(int from, int to);
 
+/*
+  Variables
+*/
 static int payroll = 0;
-static int resetGame = 0;
-
 static int timerTOCounter = 0;
 static int secondCounter = 0;
 
+/*
+  Sets payroll to v
+*/
 void set_payroll(int v) { payroll = v; }
 
+/*
+  Sets secondCounter to v
+*/
 void set_seconds(int v) { secondCounter = v; }
+
+/*
+  Get seconds elapsed
+*/
 int get_seconds(){return secondCounter;}
 
+/*
+  Sets leds 1-10
+*/
 void set_leds(int mask){
   LEDS = mask;
 }
 
+/*
+  Resets all 7-segment-displays
+*/
 void reset_disp(){
   for (int i = 0; i < 6;i++){
     REG16(SEVSEG_BASE + i * 0x10) = 0xFFFF;
   }
 }
 
+/*
+  Sets chosen 7-segments-display to value
+*/
 void set_displays(int display_number, int value){
   
   int sevSegVal = 0xFF;
@@ -128,21 +147,29 @@ void set_displays(int display_number, int value){
     Set value to chosen display
   */
   REG16(SEVSEG_BASE + display_number * 0x10) = sevSegVal;
-
 }
 
+/*
+  Returns switch value
+*/
 int get_sw(){
   unsigned int retVal = SW;
   return 0x000002FF & retVal;
 }
 
+/*
+  Returns 
+  TRUE if button is pushed
+  FALSE if not
+*/
 int get_btn(){
   return 0x1 & BTN;
 }
 
+/*
+  Make payment to payroll procedure
+*/
 void makePayment(){
-
-  int paymentDone = 0;
 
   reset_disp();
   set_displays(5, 26);  // P
@@ -150,6 +177,7 @@ void makePayment(){
   set_displays(3, 34);  // Y
   set_displays(0, 1);
 
+  int paymentDone = 0;
   while (!paymentDone) {
 
     if (get_btn()){
@@ -159,7 +187,7 @@ void makePayment(){
       paymentDone = 1;
       
       reset_disp();
-      showPayroll();
+      displayPayroll();
       print("Payment received: ");
       print_dec(payroll);
       print("\n");
@@ -185,27 +213,27 @@ void displayBet(){
   set_displays(3, 30);  // T
 }
 
+/*
+  Make bet procedure
+*/
 int makeBet(){
-
-  int newBet = 0;
 
   displayBet();
 
   while (1) {
-
     if (get_btn()){
-      newBet = get_sw();
+      if (get_sw() <= payroll){
 
-      if (newBet <= payroll){
+        int bet = get_sw();
 
         reset_disp();
         print("Your bet: ");
-        print_dec(newBet);
+        print_dec(bet);
         print("\n");
         delay(1000);
 
-        payroll -= newBet;
-        return newBet;
+        payroll -= bet;
+        return bet;
       } else {
         print("Not enough money");
         delay(500);
@@ -225,7 +253,10 @@ int makeBet(){
   }
 }
 
-void showPayroll(){
+/*
+  Displays current payroll value on 7-segment-displays
+*/
+void displayPayroll(){
 
   int ones = payroll%10;
   int tens = ((payroll-ones)%100)/10;
@@ -238,7 +269,10 @@ void showPayroll(){
   set_displays(5, thousn);
 }
 
-void showPlus(int n){
+/*
+  Displays amount won on 7-segment-displays
+*/
+void displayWinAmt(int n){
 
   int ones = n%10;
   int tens = ((n-ones)%100)/10;
@@ -259,11 +293,15 @@ void showPlus(int n){
   delay(1000);
 }
 
+/*
+  Game loop Black Jack
+*/
+int rg = 0;
 void blackjackGameLoop(){
 
   print("Time for bj!\n\n");
 
-  while(!resetGame){
+  while(!rg){
 
     print("New round!\n\n");
     delay(100);
@@ -289,7 +327,7 @@ void blackjackGameLoop(){
     }
 
     /*
-      Reset leds
+      Round finished
     */
     set_leds(0x0);
     reset_disp();
@@ -301,7 +339,7 @@ void blackjackGameLoop(){
       /*
         Show payroll
       */
-      showPayroll();
+      displayPayroll();
 
       if (get_btn()){
         print("Play again\n");
@@ -311,11 +349,14 @@ void blackjackGameLoop(){
   }
 }
 
+/*
+  Game loop roulette
+*/
 void rouletteGameLoop(){
 
   print("Time for roulette!\n\n");
 
-  while(!resetGame){
+  while(!rg){
 
     print("New round!\n\n");
     delay(100);
@@ -327,7 +368,7 @@ void rouletteGameLoop(){
     int win = playRound(currBet);
 
     if (win > 0){
-      showPlus(win);
+      displayWinAmt(win);
       payroll += win;
       print("You win: ");
       print_dec(win);
@@ -337,7 +378,7 @@ void rouletteGameLoop(){
     }
 
     /*
-      Reset leds
+      Round finished
     */
     set_leds(0x0);
     reset_disp();
@@ -349,7 +390,7 @@ void rouletteGameLoop(){
       /*
         Show payroll
       */
-      showPayroll();
+      displayPayroll();
 
       if (get_btn()){
         print("Play again\n");
@@ -359,27 +400,40 @@ void rouletteGameLoop(){
   }
 }
 
+/*
+  Resets game
+
+  Called from interrupt handler when switch #10 is flicked
+*/
+void resetGame(){
+
+  set_leds(0x0);
+  reset_disp();
+  print("Game reset\n\n");
+
+  letsPlay();
+}
+
+/*
+  Choose game procedure
+*/
 void letsPlay(){
 
-  /*
-      Choose game
-  */
   reset_disp();
   set_displays(5, 1);
   set_displays(0, 2);
 
   while (1) {
-
     if (get_btn()){
       delay(100);
-      if (get_sw() == 1){ // Roulette choosed
+      if (get_sw() == 1){ // Roulette
+        displayBgImage(RouletteEmpty_);
         rouletteGameLoop();
       }
-      if (get_sw() == 2){ // Black jack choosed
-        testDisplay();
+      if (get_sw() == 2){ // Black jack
+        displayBgImage(BJTable_);
         blackjackGameLoop();
       }
-      resetGame = 0; // Unreset reset button
     }
   }
 }
@@ -402,8 +456,7 @@ void handle_interrupt(unsigned cause)
     SW_EDGE  = edge;          // clear it by writing 1s back
     delay(100);
     if (edge & 0x200) {           // check if switch #10 (bit10) caused it
-      print("Reset game\n");
-      resetGame = 1;
+      resetGame();
     }
   }
 
@@ -418,7 +471,7 @@ void handle_interrupt(unsigned cause)
 
 /* Add your code here for initializing interrupts. */
 void init(void) {
-  TMR1_PERLO = (29999999/10) & 0xFFFF;
+  TMR1_PERLO = (29999999/10) & 0xFFFF; // Sets period to 1/10 second
   TMR1_PERHI = (29999999/10) >> 16;
   TMR1_CR    = 0x7;     // start clock, CONTINUE,enables ITO
   SW_IRQ     = 0x200;     // enable switch IRQ for switch # 10
@@ -429,21 +482,10 @@ void init(void) {
 /* Your code goes into main as well as any needed functions. */
 int main() {
 
-  /*
-  testDisplay();
-  while(1){
-    if (get_btn()){
-      delay(200);
-      testAnimation();
-    }
-  }*/
-  
   init();
   reset_disp();
 
-  /*
-    Start screen
-  */
+  displayBgImage(MainScreen_);
 
   set_displays(0, 36);
   set_displays(1, 36);
@@ -453,7 +495,6 @@ int main() {
   set_displays(5, 36);
 
   int cont = 0;
-
   while (!cont) {
     if (get_btn()){
       delay(100);

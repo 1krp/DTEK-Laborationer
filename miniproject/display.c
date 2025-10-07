@@ -1,28 +1,14 @@
 #include "hw_regs.h"
-#include "graphics/tabBG.h"
-#include "graphics/SA.h"
+#include "graphics/bgPxArrays.h"
+#include "graphics/cardPxArrays.h"
 
-void testDisplay(){
-  //volatile char* VGA = (volatile char*) 0x08000000;
-
+void displayBgImage(unsigned char img[]){
   for (int i = 0; i < 320*480; i++){
-    VGA_FB[i] = tabBG[i];
+    VGA_FB[i] = img[i];
   }
-
-  /*
-  unsigned int y_ofs = 0;
-
-  volatile int* VGA_CTRL = (volatile int*) 0x04000100;
-  
-  
-  while(1){
-    *(VGA_CTRL+1) = (unsigned int) (VGA+y_ofs*320);
-    *(VGA_CTRL+0) = 0;
-    y_ofs = (y_ofs+1) % 240;
-    delay(100);
-  }*/
 }
 
+/*
 void testAnimation(){ // 28*41
 
   int cardInd = 0;
@@ -36,4 +22,4 @@ void testAnimation(){ // 28*41
     }
     
   }
-}
+}*/

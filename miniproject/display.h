@@ -1,2 +1,1 @@
-void testDisplay();
-void testAnimation();
+void displayBgImage(unsigned char img[]);

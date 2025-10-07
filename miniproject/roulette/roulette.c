@@ -13,6 +13,11 @@ extern int randFT(int from, int to);
 extern int nextprime( int );
 
 /*
+  Roulette constants
+*/
+#define DECELERATION 1.07
+
+/*
   Roulette globals
 */
 static int betEven = 0;
@@ -205,9 +210,9 @@ int spinWheel(){
     delay(delayT);
 
     /*
-      Increase delay time
+      Decelerate ball speed (increase delay time)
     */
-    delayT += 1.07*get_seconds();
+    delayT += DECELERATION*get_seconds();
   }
 
   /*
