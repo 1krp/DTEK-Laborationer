@@ -478,6 +478,22 @@ void init(void) {
   SW_IRQ     = 0x200;     // enable switch IRQ for switch # 10
   BTN_IRQ    = 0x1;     // enable button IRQ
   enable_interrupts();
+
+  video_init(320, 240);
+}
+
+static void video_init(int width, int height) {
+    // 1) Program the DMA's notion of resolution
+    VGA_CTRL[REG_RES]  = (height << 16) | (width & 0xFFFF);
+
+    // 2) Point backbuffer to our SDRAM framebuffer base
+    VGA_CTRL[REG_BACK] = (int)(&VGA_FB[0]);
+
+    // 3) Request a swap so DMA starts reading from that base
+    VGA_CTRL[REG_BUFFER] = 0;
+
+    // 4) Wait until the swap completes (optional but tidy)
+    while (VGA_CTRL[REG_STATUS] & 1) { /* spin */ }
 }
 
 /* Your code goes into main as well as any needed functions. */
