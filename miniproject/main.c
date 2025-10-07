@@ -482,7 +482,7 @@ void init(void) {
   video_init(320, 240);
 }
 
-static void video_init(int width, int height) {
+void video_init(int width, int height) {
     // 1) Program the DMA's notion of resolution
     VGA_CTRL[REG_RES]  = (height << 16) | (width & 0xFFFF);
 

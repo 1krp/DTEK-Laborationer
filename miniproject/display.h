@@ -1,2 +1,2 @@
 void displayBgImage(unsigned char* img);
-void displayCardImage(unsigned char* img, int cardNr);
+void displayCardImage(int x, int y, unsigned char* img);

@@ -43,7 +43,7 @@ int Run = 0;
 int pStand = 0;
 
 int pY = 181;
-int dY = 20;
+int dY = 40;
 
 int cardOffset[10] = {0,1,-1,2,-2,3,-3,4,-4,5};
 
@@ -95,15 +95,23 @@ void fill_deck(Card *deck) {
             deck[i].value = (i % 13) + 2;
             deck[i].imgIndex = i;
         }
+        print(deck[i].suit);
+        print_dec(deck[i].value);
+        print(": ");
+        print_dec(deck[i].imgIndex);
+        print("\n");
+
     }
+    print("\n");
 }
+
 // fisher-yates-shuffling
 void shuffle_deck(Card *deck) {
-    int n = 52;
+    int n = DECK_SIZE;
     Card temp;
 
-    for (int i = n - 1; i > 0; i--) {
-        int j = randFT(1, 52);
+    for (int i = n - 1; i > 0; --i) {
+        int j = randFT(0, i);
         temp = deck[j];
         deck[j] = deck[i];
         deck[i] = temp;
@@ -135,13 +143,21 @@ void init_game(Card *pHand, Card *dHand, Card *deck) {
     displayCardImage(cardXOffset(1), pY, cardImageArr[pHand[0].imgIndex]);
     displayCardImage(cardXOffset(2), pY, cardImageArr[pHand[1].imgIndex]);
 
+    print("Check card pixel value: ");
+    print_dec(pHand[0].imgIndex);
+    print(pHand[0].suit);
+    print_dec(pHand[0].value);
+    print("\n");
+    print_dec(cardImageArr[pHand[0].imgIndex][0]);
+    print("\n");
+
     print("Dealer start hand: \n");
     deal_card(deck, dHand, 2);
     print("\n");
     dCardCounter = 2;
 
-    //displayCardImage(cardXOffset(1), pY, cardPxArrays, dHand[0].imgIndex);
-    //displayCardImage(cardXOffset(2), pY, cardPxArrays, dHand[1].imgIndex);
+    displayCardImage(cardXOffset(1), dY, cardImageArr[52]);
+    displayCardImage(cardXOffset(2), dY, cardImageArr[52]);
 }
 
 void new_round(Card *pHand, Card *dHand, Card *deck) {
@@ -164,13 +180,28 @@ void deal_card(Card *deck, Card *hand, int numOfCards) {
 
     for(int i = 0; i < 10; i++){
         if(hand[i].value == 0 && dealtCardsCounter < numOfCards){
+
+            print("Top of deck: ");
+            print_dec(topOfDeck);
+            print("\n");
+
+
+            print("Top card: ");
+            print_dec(deck[topOfDeck].imgIndex);
+            print(deck[topOfDeck].suit);
+            print(" ");
+            print_dec(deck[topOfDeck].value);
+            print("\n");
+
             hand[i].suit = deck[topOfDeck].suit;
             hand[i].value = deck[topOfDeck].value;
+            hand[i].imgIndex = deck[topOfDeck].imgIndex;
             topOfDeck++;
             dealtCardsCounter++;
 
             // Print drawn card
             print("Drawn card: ");
+            print_dec(hand[i].imgIndex);
             print(hand[i].suit);
             print(" ");
             print_dec(hand[i].value);
@@ -262,7 +293,7 @@ void print_winner(){
 }
 
 int cardXOffset(int cardCounter) {
-    return 29*cardOffset[cardCounter-1];
+    return 132+29*cardOffset[cardCounter-1];
 }
 
 Card deck[DECK_SIZE];

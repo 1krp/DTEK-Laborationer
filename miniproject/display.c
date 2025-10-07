@@ -4,22 +4,22 @@
 
 #define BGIMGSIZE 76800
 #define CARDIMGSIZE 1148
+#define FRAMESIZE 10
 
-void displayBgImage(unsigned char img[]){
+void displayBgImage(unsigned char* img){
   for (int i = 0; i < BGIMGSIZE; i++){
     VGA_FB[i] = img[i];
   }
 }
 //X is px from left
 //Y is px from top
-void displayCardImage(int x, int y, unsigned char img[]){
+void displayCardImage(int x, int y, unsigned char* img){
 
   int cardInd = 0;
+  int i = y*320+x;
 
   while (cardInd < CARDIMGSIZE) {
-    int i = y*320+x;
-
-    if(i % 320-x < 29){
+    if( (i%320) - x < 28){
         VGA_FB[i] = img[cardInd];
         cardInd ++;
         i++;
@@ -27,5 +27,4 @@ void displayCardImage(int x, int y, unsigned char img[]){
         i += 320 - 28;
     }
   }
-  
 }
