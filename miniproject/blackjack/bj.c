@@ -1,6 +1,8 @@
 #include "bj.h"
 #include "../main.h"
 #include "../display.h"
+#include "../graphics/bgPxArrays.h"
+#include "../graphics/cardPxArrays.h"
 
 #define HAND_SIZE 10
 #define DECK_SIZE 52
@@ -13,6 +15,7 @@ extern void print_dec(unsigned int);
 typedef struct card {
     char *suit;
     int value;
+    int imgIndex;
 } Card;
 
 void init_deck(Card *deck);
@@ -25,14 +28,22 @@ void start_game(Card *pHand, Card *dHand, Card *deck);
 
 // Global variables
 int topOfDeck = 0;
+
 int pHandValue = 0;
 int dHandValue = 0;
-int pHandCounter = 0;
-int dHandCounter = 0;
+
+int pCardCounter = 0;
+int dCardCounter = 0;
+
+int pShownCardIndex = 0;
+int dShownCardIndex = 0;
+
 int roundStatus = 0; // 0 = ongoing, 1 = player win, 2 = dealer win, 3 = push
 int Run = 0;
 int pStand = 0;
 
+int pY = 181;
+int dY = 20;
 
 int cardOffset[10] = {0,1,-1,2,-2,3,-3,4,-4,5};
 
@@ -40,6 +51,7 @@ Card create_card(char *suit, int value) {
     Card new_card;
     new_card.suit = suit;
     new_card.value = value;
+    new_card.imgIndex = 0;
     return new_card;
 }
 /*
@@ -49,6 +61,7 @@ void init_deck(Card *deck) {
     for (int i = 0; i < DECK_SIZE; i++) {
         deck[i].suit = "";
         deck[i].value = 0;
+        deck[i].imgIndex = 0;
     }
 }
 /*
@@ -59,23 +72,28 @@ void init_hand(Card *hand) {
     for (int i = 0; i < HAND_SIZE; i++) {
         hand[i].suit = "empty";
         hand[i].value = 0;
+        hand[i].imgIndex = 0;
     }
 }
 
 void fill_deck(Card *deck) {
     for(int i = 0; i < 52; i++) {
-        if(i % 4 == 0) {
-            deck[i].suit = "Hearts";
+        if(i < 13) {
+            deck[i].suit = "H";
             deck[i].value = (i % 13) + 2;
-        } else if(i % 4 == 1) {
-            deck[i].suit = "Diamonds";
+            deck[i].imgIndex = i;
+        } else if(i < 26) {
+            deck[i].suit = "S";
             deck[i].value = (i % 13) + 2;
-        } else if(i % 4 == 2) {
-            deck[i].suit = "Clubs";
+            deck[i].imgIndex = i;
+        } else if(i < 39) {
+            deck[i].suit = "C";
             deck[i].value = (i % 13) + 2;
-        } else if(i % 4 == 3) {
-            deck[i].suit = "Spades";
+            deck[i].imgIndex = i;
+        } else if(i < 52) {
+            deck[i].suit = "D";
             deck[i].value = (i % 13) + 2;
+            deck[i].imgIndex = i;
         }
     }
 }
@@ -112,12 +130,18 @@ void init_game(Card *pHand, Card *dHand, Card *deck) {
 
     print("Player start hand: \n");
     deal_card(deck, pHand, 2);
-    pHandCounter = 2;
+    pCardCounter = 2;
+
+    displayCardImage(cardXOffset(1), pY, cardPxArrays, pHand[0].imgIndex);
+    displayCardImage(cardXOffset(2), pY, cardPxArrays, pHand[1].imgIndex);
 
     print("Dealer start hand: \n");
     deal_card(deck, dHand, 2);
     print("\n");
-    dHandCounter = 2;
+    dCardCounter = 2;
+
+    displayCardImage(cardXOffset(1), pY, cardPxArrays, dHand[0].imgIndex);
+    displayCardImage(cardXOffset(2), pY, cardPxArrays, dHand[1].imgIndex);
 }
 
 void new_round(Card *pHand, Card *dHand, Card *deck) {
@@ -237,18 +261,7 @@ void print_winner(){
     }
 }
 
-int cardXOffset(Card *hand, int size){
-    int cardCounter = 0;
-
-    for(int i = 0; i < size; i++){
-        if(hand[i].value != 0){
-            cardCounter++;
-        }
-    }
-    if (cardCounter = 0) {
-        return 0;
-    }
-    
+int cardXOffset(int cardCounter) {
     return 29*cardOffset[cardCounter-1];
 }
 

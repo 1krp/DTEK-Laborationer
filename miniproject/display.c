@@ -10,14 +10,15 @@ void displayBgImage(unsigned char img[]){
     VGA_FB[i] = img[i];
   }
 }
-
-void displayCardImage(unsigned char img[], int cardNr){
+//X is px from left
+//Y is px from top
+void displayCardImage(int x, int y, unsigned char img[], int cardNr){
 
   int cardInd = 0;
 
   for (int i = 0; i < 320*480; i++){
     
-    if (i > 57919 && i%320 > 10 + cardNr + (cardNr-1)*28 && i%320 <= 10 + cardNr + (cardNr)*28 ){
+    if (i > 320*y-1 && i%320 > 10 + cardNr + (cardNr-1)*28 && i%320 <= 10 + cardNr + (cardNr)*28 ){
 
       if (cardInd < CARDIMGSIZE){
         VGA_FB[i] = img[cardInd];
