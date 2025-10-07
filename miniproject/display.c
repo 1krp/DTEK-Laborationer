@@ -2,24 +2,26 @@
 #include "graphics/bgPxArrays.h"
 #include "graphics/cardPxArrays.h"
 
+#define BGIMGSIZE 76800
+#define CARDIMGSIZE 1148
+
 void displayBgImage(unsigned char img[]){
-  for (int i = 0; i < 320*480; i++){
+  for (int i = 0; i < BGIMGSIZE; i++){
     VGA_FB[i] = img[i];
   }
 }
 
-/*
-void testAnimation(){ // 28*41
+void displayCardImage(unsigned char img[], int cardNr){
 
   int cardInd = 0;
-  for (int i = 0; i < 320*480; i++){
-    if (i > 40000 && i%320 > 50 && i%320 <= 78) {
 
-      if (cardInd < 1148){
-        VGA_FB[i] = SA[cardInd];
+  for (int i = 0; i < 320*480; i++){
+    if (i > 57919 && i%320 > 1+((cardNr-1)*28) && i%320 <= 29+((cardNr-1)*28) ){
+
+      if (cardInd < CARDIMGSIZE){
+        VGA_FB[i] = img[cardInd];
         cardInd ++;
       }
     }
-    
   }
-}*/
+}
