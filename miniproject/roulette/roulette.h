@@ -1,6 +1,6 @@
 #ifndef ROULETTE_H
 #define ROULETTE_H
 
-int roulette(int bet);
+int playRound(int bet);
 
 #endif

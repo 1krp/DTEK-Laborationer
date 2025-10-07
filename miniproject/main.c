@@ -9,8 +9,9 @@
 
 #include "main.h"
 #include "hw_regs.h"
-#include "roulette.h"
-#include "bj.h"
+#include "roulette/roulette.h"
+#include "blackjack/bj.h"
+#include "display.h"
 
 extern void print(const char*);
 extern void print_dec(unsigned int);
@@ -258,7 +259,7 @@ void showPlus(int n){
   delay(1000);
 }
 
-void blackjackGameRun(){
+void blackjackGameLoop(){
 
   print("Time for bj!\n\n");
 
@@ -310,7 +311,7 @@ void blackjackGameRun(){
   }
 }
 
-void rouletteGameRun(){
+void rouletteGameLoop(){
 
   print("Time for roulette!\n\n");
 
@@ -323,7 +324,7 @@ void rouletteGameRun(){
     print("-- Make bet -- \n\n");
     currBet = makeBet();
 
-    int win = roulette(currBet);
+    int win = playRound(currBet);
 
     if (win > 0){
       showPlus(win);
@@ -372,10 +373,11 @@ void letsPlay(){
     if (get_btn()){
       delay(100);
       if (get_sw() == 1){ // Roulette choosed
-        rouletteGameRun();
+        rouletteGameLoop();
       }
       if (get_sw() == 2){ // Black jack choosed
-        blackjackGameRun();
+        testDisplay();
+        blackjackGameLoop();
       }
       resetGame = 0; // Unreset reset button
     }
@@ -426,6 +428,16 @@ void init(void) {
 
 /* Your code goes into main as well as any needed functions. */
 int main() {
+
+  /*
+  testDisplay();
+  while(1){
+    if (get_btn()){
+      delay(200);
+      testAnimation();
+    }
+  }*/
+  
   init();
   reset_disp();
 

@@ -4,6 +4,8 @@
 
 #define REG32(addr)   (*(volatile int *)(addr))
 #define REG16(addr)   (*(volatile short *)(addr))
+#define MMIO8(addr)   ((volatile unsigned char *)(addr))
+#define MMIO32(addr)  ((volatile unsigned int  *)(addr))
 
 // Timer
 #define TMR1_SR       REG16(0x04000020)
@@ -28,5 +30,14 @@
 
 // 7-seg
 #define SEVSEG_BASE   0x04000050u
+
+// VGA-display
+#define VGA_FB        MMIO8(0x08000000)
+#define VGA_CTRL      MMIO32(0x04000100)
+
+#define REG_BUFFER    0
+#define REG_BACK      1
+#define REG_RES       2
+#define REG_STATUS    3
 
 #endif // HW_REGS_H

@@ -1,5 +1,5 @@
 #include "bj.h"
-#include "main.h"
+#include "../main.h"
 
 #define HAND_SIZE 10
 #define DECK_SIZE 52
@@ -283,16 +283,17 @@ int bjGameLoop() {
                 Show current switch number
                 */
                 if (get_sw()%2 == 1){
-                    reset_disp();
                     set_displays(5, 18);    // H
                     set_displays(4, 1);     // I
                     set_displays(3, 30);    // T
+                    set_displays(2, 35);
+                    set_displays(1, 35);
                 } else if (get_sw()%2 == 0){
-                    set_displays(5, 5);
-                    set_displays(4, 30);
-                    set_displays(3, 11);
-                    set_displays(2, 24);
-                    set_displays(1, 14);
+                    set_displays(5, 5);     // S
+                    set_displays(4, 30);    // T
+                    set_displays(3, 11);    // A
+                    set_displays(2, 24);    // N
+                    set_displays(1, 14);    // D
                 }
             }
 
