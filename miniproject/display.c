@@ -12,18 +12,20 @@ void displayBgImage(unsigned char img[]){
 }
 //X is px from left
 //Y is px from top
-void displayCardImage(int x, int y, unsigned char img[], int cardNr){
+void displayCardImage(int x, int y, unsigned char img[]){
 
   int cardInd = 0;
 
-  for (int i = 0; i < 320*480; i++){
-    
-    if (i > 320*y-1 && i%320 > 10 + cardNr + (cardNr-1)*28 && i%320 <= 10 + cardNr + (cardNr)*28 ){
+  while (cardInd < CARDIMGSIZE) {
+    int i = y*320+x;
 
-      if (cardInd < CARDIMGSIZE){
+    if(i % 320-x < 29){
         VGA_FB[i] = img[cardInd];
         cardInd ++;
-      }
+        i++;
+    }else{
+        i += 320 - 28;
     }
   }
+  
 }
