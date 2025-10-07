@@ -367,6 +367,9 @@ int bjGameLoop() {
             if (choice == 1){ // Hit
                 print("Player hits.\n");
                 deal_card(deck,pHand,1);
+                pCardCounter++;
+
+                displayCardImage(cardXOffset(pCardCounter), pY, cardImageArr[pHand[pCardCounter-1].imgIndex]);
 
                 pHandValue = count_hand_value(pHand, HAND_SIZE);
 
@@ -382,6 +385,8 @@ int bjGameLoop() {
         if (dHandValue < 17){
             print("Dealers turn: \n");
             deal_card(deck, dHand, 1);
+            dCardCounter++;
+            displayCardImage(cardXOffset(dCardCounter), dY, cardImageArr[dHand[dCardCounter-1].imgIndex]);
 
             dHandValue = count_hand_value(dHand, HAND_SIZE);
 
