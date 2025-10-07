@@ -132,16 +132,16 @@ void init_game(Card *pHand, Card *dHand, Card *deck) {
     deal_card(deck, pHand, 2);
     pCardCounter = 2;
 
-    displayCardImage(cardXOffset(1), pY, cardPxArrays, pHand[0].imgIndex);
-    displayCardImage(cardXOffset(2), pY, cardPxArrays, pHand[1].imgIndex);
+    displayCardImage(cardXOffset(1), pY, cardImageArr[pHand[0].imgIndex]);
+    displayCardImage(cardXOffset(2), pY, cardImageArr[pHand[1].imgIndex]);
 
     print("Dealer start hand: \n");
     deal_card(deck, dHand, 2);
     print("\n");
     dCardCounter = 2;
 
-    displayCardImage(cardXOffset(1), pY, cardPxArrays, dHand[0].imgIndex);
-    displayCardImage(cardXOffset(2), pY, cardPxArrays, dHand[1].imgIndex);
+    //displayCardImage(cardXOffset(1), pY, cardPxArrays, dHand[0].imgIndex);
+    //displayCardImage(cardXOffset(2), pY, cardPxArrays, dHand[1].imgIndex);
 }
 
 void new_round(Card *pHand, Card *dHand, Card *deck) {

@@ -5305,4 +5305,10 @@ static const unsigned char SQ_[] = {
 };
 static const unsigned int SQ__len = 1148;
 
+static const unsigned char* cardImageArr[] = {H2_, H3_,H4_,H5_,H6_,H7_,H8_,H9_,H10_,HJ_,HQ_,HK_,HA_,
+                                              S2_, S3_,S4_,S5_,S6_,S7_,S8_,S9_,S10_,SJ_,SQ_,SK_,SA_,
+                                              C2_, C3_,C4_,C5_,C6_,C7_,C8_,C9_,C10_,CJ_,CQ_,CK_,CA_,
+                                              D2_, D3_,D4_,D5_,D6_,D7_,D8_,D9_,D10_,DJ_,DQ_,DK_,DA_,
+                                              BACK_};
+
 #endif /* CARD_PX_ARRAYS_H */
