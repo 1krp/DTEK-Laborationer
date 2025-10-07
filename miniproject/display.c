@@ -16,7 +16,8 @@ void displayCardImage(unsigned char img[], int cardNr){
   int cardInd = 0;
 
   for (int i = 0; i < 320*480; i++){
-    if (i > 57919 && i%320 > 1+((cardNr-1)*28) && i%320 <= 29+((cardNr-1)*28) ){
+    
+    if (i > 57919 && i%320 > 10 + cardNr + (cardNr-1)*28 && i%320 <= 10 + cardNr + (cardNr)*28 ){
 
       if (cardInd < CARDIMGSIZE){
         VGA_FB[i] = img[cardInd];

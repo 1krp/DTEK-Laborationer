@@ -1,5 +1,6 @@
 #include "bj.h"
 #include "../main.h"
+#include "../display.h"
 
 #define HAND_SIZE 10
 #define DECK_SIZE 52
@@ -26,9 +27,12 @@ void start_game(Card *pHand, Card *dHand, Card *deck);
 int topOfDeck = 0;
 int pHandValue = 0;
 int dHandValue = 0;
+int pHandCounter = 0;
+int dHandCounter = 0;
 int roundStatus = 0; // 0 = ongoing, 1 = player win, 2 = dealer win, 3 = push
 int Run = 0;
 int pStand = 0;
+
 
 int cardOffset[10] = {0,1,-1,2,-2,3,-3,4,-4,5};
 
@@ -108,10 +112,12 @@ void init_game(Card *pHand, Card *dHand, Card *deck) {
 
     print("Player start hand: \n");
     deal_card(deck, pHand, 2);
+    pHandCounter = 2;
 
     print("Dealer start hand: \n");
     deal_card(deck, dHand, 2);
     print("\n");
+    dHandCounter = 2;
 }
 
 void new_round(Card *pHand, Card *dHand, Card *deck) {

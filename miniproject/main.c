@@ -13,6 +13,7 @@
 #include "blackjack/bj.h"
 #include "display.h"
 #include "graphics/bgPxArrays.h"
+#include "graphics/cardPxArrays.h"
 
 extern void print(const char*);
 extern void print_dec(unsigned int);
@@ -486,14 +487,7 @@ int main() {
   reset_disp();
 
   displayBgImage(MainScreen_);
-
-  set_displays(0, 36);
-  set_displays(1, 36);
-  set_displays(2, 1);
-  set_displays(3, 18);
-  set_displays(4, 36);
-  set_displays(5, 36);
-
+  
   int cont = 0;
   while (!cont) {
     if (get_btn()){
