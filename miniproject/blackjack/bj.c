@@ -27,11 +27,15 @@ void start_game(Card *pHand, Card *dHand, Card *deck);
 
 
 // Global variables
+
+//card to be dealt next
 int topOfDeck = 0;
 
+//total hand value
 int pHandValue = 0;
 int dHandValue = 0;
 
+//cards in a hand
 int pCardCounter = 0;
 int dCardCounter = 0;
 
@@ -42,6 +46,7 @@ int roundStatus = 0; // 0 = ongoing, 1 = player win, 2 = dealer win, 3 = push
 int Run = 0;
 int pStand = 0;
 
+//distance for the cards
 int pY = 181;
 int dY = 40;
 
@@ -54,6 +59,7 @@ Card create_card(char *suit, int value) {
     new_card.imgIndex = 0;
     return new_card;
 }
+
 /*
 Initializes a deck of DECK_SIZE empty cards
 */
@@ -64,10 +70,10 @@ void init_deck(Card *deck) {
         deck[i].imgIndex = 0;
     }
 }
+
 /*
 Initializes a hand of 3 empty cards
 */
-
 void init_hand(Card *hand) {
     for (int i = 0; i < HAND_SIZE; i++) {
         hand[i].suit = "empty";
@@ -76,6 +82,9 @@ void init_hand(Card *hand) {
     }
 }
 
+/*
+Assigns the values for each resepective card for all the empty cards
+*/
 void fill_deck(Card *deck) {
     for(int i = 0; i < 52; i++) {
         if(i < 13) {
@@ -105,7 +114,9 @@ void fill_deck(Card *deck) {
     print("\n");
 }
 
-// fisher-yates-shuffling
+/*
+Shuffels the Deck, using randFT, witch uses snaplo as seed
+*/
 void shuffle_deck(Card *deck) {
     int n = DECK_SIZE;
     Card temp;
@@ -119,7 +130,9 @@ void shuffle_deck(Card *deck) {
 
     print("Deck is shuffled!\n\n");
 }
-
+/*
+All variabels are reset, initialises the hands and the deck with empty cards, shuffels, and deals and prints/displays the first four cards.
+*/
 void init_game(Card *pHand, Card *dHand, Card *deck) {
 
     print("Initializes game.\n\n");
@@ -160,21 +173,9 @@ void init_game(Card *pHand, Card *dHand, Card *deck) {
     displayCardImage(cardXOffset(2), dY, cardImageArr[52]);
 }
 
-void new_round(Card *pHand, Card *dHand, Card *deck) {
-    init_hand(pHand);
-    init_hand(dHand);
-    
-    shuffle_deck(deck);
-
-    topOfDeck = 0;
-    pHandValue = 0;
-    dHandValue = 0;
-    roundStatus = 0;
-
-    deal_card(deck, pHand, 2);
-    deal_card(deck, dHand, 2);
-}
-
+/*
+Deals card to a specific hand from the deck, it can deal multible cards in one call.
+*/
 void deal_card(Card *deck, Card *hand, int numOfCards) {
     int dealtCardsCounter = 0;
 
@@ -210,7 +211,9 @@ void deal_card(Card *deck, Card *hand, int numOfCards) {
         }
     }
 }
-
+/*
+Prints the cards from a card array to the terminal
+*/
 void print_cards(Card *hand, int size) {
     for (int i = 0; i < size; i++) {
         if (hand[i].value !=0) {
@@ -223,7 +226,9 @@ void print_cards(Card *hand, int size) {
         }
     }
 }
-
+/*
+Sums the value of the cards in a hand, Takes to account the opptimal value for a ACE (1/11)
+*/
 int count_hand_value(Card *hand, int size) {
     int handValue = 0;
     int aceCounter = 0;
@@ -250,15 +255,9 @@ int count_hand_value(Card *hand, int size) {
 
     return handValue;
 }
-
-void dealer_turn(Card *deck, Card *dHand) {
-    while (dHandValue < 17) {
-        deal_card(deck, dHand, 1);
-        dHandValue = count_hand_value(dHand, HAND_SIZE);
-    }
-}
-
-
+/*
+Changes the roundStatus variable, if that variable is 0, game is ongoing else (1,2,3) some one has won/draw.
+*/
 void round_status(){
     if (pStand){
         if (pHandValue > dHandValue){
@@ -281,7 +280,9 @@ void round_status(){
         roundStatus = 1; // player win
     }
 }
-
+/*
+Prints the winner to the terminal
+*/
 void print_winner(){
     if (roundStatus == 1) {
         print("Player wins!\n");
@@ -291,15 +292,27 @@ void print_winner(){
         print("It's a push!\n");
     }
 }
-
+/*
+Returns the x cordinate to where the card should be printed, to a given handsize.
+*/
 int cardXOffset(int cardCounter) {
     return 132+29*cardOffset[cardCounter-1];
+}
+/*
+"Flips" the dealers cards, a loop that Displays all the dealercards on the display.
+*/
+void displayDealersCards(){
+    for (int i = 0; i < dCardCounter; i++){
+        displayCardImage(cardXOffset(i), dY, cardImageArr[dHand[i].imgIndex]);
+    }
 }
 
 Card deck[DECK_SIZE];
 Card pHand[HAND_SIZE];
 Card dHand[HAND_SIZE];
-
+/*
+The main game loop, called from main.c
+*/
 int bjGameLoop() {
 
     print("Let's play!\n\n");
@@ -412,6 +425,9 @@ int bjGameLoop() {
     }
 
     print("\n--------------Round Over------------\n");
+
+
+    displayDealersCards();
 
     print_cards(pHand, HAND_SIZE);
     print("Player hand value: ");
