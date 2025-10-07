@@ -30,6 +30,7 @@ int roundStatus = 0; // 0 = ongoing, 1 = player win, 2 = dealer win, 3 = push
 int Run = 0;
 int pStand = 0;
 
+int cardOffset[10] = {0,1,-1,2,-2,3,-3,4,-4,5};
 
 Card create_card(char *suit, int value) {
     Card new_card;
@@ -144,6 +145,7 @@ void deal_card(Card *deck, Card *hand, int numOfCards) {
             print(" ");
             print_dec(hand[i].value);
             print("\n");
+
         }
     }
 }
@@ -227,6 +229,21 @@ void print_winner(){
     } else if (roundStatus == 3) {
         print("It's a push!\n");
     }
+}
+
+int cardXOffset(Card *hand, int size){
+    int cardCounter = 0;
+
+    for(int i = 0; i < size; i++){
+        if(hand[i].value != 0){
+            cardCounter++;
+        }
+    }
+    if (cardCounter = 0) {
+        return 0;
+    }
+    
+    return 29*cardOffset[cardCounter-1];
 }
 
 Card deck[DECK_SIZE];
