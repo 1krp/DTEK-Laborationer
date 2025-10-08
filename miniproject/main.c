@@ -246,32 +246,6 @@ void makePayment(){
   set_displays(3, 34);  // Y
   set_displays(0, 1);
 
-  /*
-  while (!get_btn()){
-
-    
-    int currentPayment = get_sw();
-    int currOnes = currentPayment%10;
-    int currTens = ((currentPayment-currOnes)%100)/10;
-    int currHundr = ((currentPayment-currOnes-currTens)%1000)/100;
-    set_displays(2, currHundr);
-    set_displays(1, currTens);
-    set_displays(0, currOnes);
-  }
-
-  delay(100);
-  reset_btn();
-
-  payroll = get_sw();
-      
-  reset_disp();
-  displayPayroll();
-  print("Payment received: ");
-  print_dec(payroll);
-  print("\n");
-  */
-
-  //int paymentDone = 0;
   while (!payroll) {
 
     if (get_btn()){
@@ -279,7 +253,6 @@ void makePayment(){
       reset_btn();
 
       payroll = get_sw();
-      //paymentDone = 1;
       
       reset_disp();
       displayPayroll();
@@ -402,6 +375,12 @@ void displayWinAmt(int n){
   delay(1000);
 }
 
+void resetDisplays(){
+    reset_disp();
+    displayBgImage(MainScreen_);
+    displayPayroll();
+}
+
 /*
   Game loop Black Jack
 */
@@ -499,10 +478,11 @@ void blackjackGameLoop(){
           print("Play again\n");
           choiceMade = 1;
         } else if (get_sw()%2 == 1){ // Return to lobby
-          print("Return to lobby\n");
-          displayBgImage(MainScreen_);
           choiceMade = 1;
           continueGame = 0;
+
+          print("Return to lobby\n");
+          resetDisplays();
         }
       }
 
@@ -514,9 +494,7 @@ void blackjackGameLoop(){
       } else {
         set_displays(0, 28);  // "r" (Return)
       }
-
     }
-    reset_disp();
   }
 }
 
@@ -598,10 +576,11 @@ void rouletteGameLoop(){
           print("Play again\n");
           choiceMade = 1;
         } else if (get_sw()%2 == 1){ // Return to lobby
-          print("Return to lobby\n");
-          displayBgImage(MainScreen_);
           choiceMade = 1;
           continueGame = 0;
+
+          print("Return to lobby\n");
+          resetDisplays();
         }
       }
 
@@ -615,7 +594,6 @@ void rouletteGameLoop(){
       }
       
     }
-    reset_disp();
   }
 }
 
@@ -627,6 +605,7 @@ void letsPlay(){
   reset_disp();
   displayBgImage(MainScreen_);
   printPayroll();
+  displayPayroll();
 
   /*
     Loop where player chooses game
