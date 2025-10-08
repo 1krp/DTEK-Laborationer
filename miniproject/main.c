@@ -29,12 +29,16 @@ static int timerTOCounter = 0;
 static int secondCounter = 0;
 static int continueGame = 1;
 int choiceMade = 0;
-static int buttonPushed;
 volatile int request_reset = 0;
 
 #define IRQ_TIMER   0x10
 #define IRQ_SWITCH  0x11
 #define IRQ_BTN     0x12
+#define BTN_BIT     0x1
+#define PRESSED_IS_1 0 
+
+volatile int last_level = 0;
+volatile int buttonIsPushed = 0;
 
 /*
   Sets payroll to v
@@ -186,9 +190,36 @@ int get_sw(){
   TRUE if button is pushed
   FALSE if not
 */
+/*
 int get_btn(){
-  return 0x1 & BTN;
+  if (buttonIsPushed) {
+    //buttonState ++;
+    delay(50);
+  }
+  if (buttonState != 0 && buttonState%2 == 0) {
+    buttonState = 0;
+    return 1;
+  }
+  return 0;
+  //return buttonIsPushed;
 }
+*/
+int get_btn(){
+  return buttonIsPushed;
+}
+void reset_btn(){
+  buttonIsPushed = 0;
+}
+/*
+int get_btn(){
+  //return 0x1 & BTN;
+  int edges = BTN_EDGE;  // read latched edges
+  if (edges & BTN_BIT) {
+      BTN_EDGE = edges;  // clear by writing 1s back
+      return 1;
+  }
+  return 0;
+}*/
 
 void waitForButton(Command cmd){
 
@@ -217,13 +248,9 @@ void waitForButton(Command cmd){
     set_displays(0, 35);
   }
 
-  buttonPushed = 0;
-  while (!buttonPushed){
-    if (get_btn()){
-      buttonPushed = 1;
-      delay(200);
-    }
-  }
+  while (!get_btn()){}
+  delay(100);
+  reset_btn();
   reset_disp();
 }
 
@@ -243,6 +270,7 @@ void makePayment(){
 
     if (get_btn()){
       delay(100);
+      reset_btn();
 
       payroll = get_sw();
       paymentDone = 1;
@@ -283,6 +311,8 @@ int makeBet(){
 
   while (1) {
     if (get_btn()){
+      delay(200);
+      reset_btn();
       if (get_sw() <= payroll){
 
         int bet = get_sw();
@@ -455,6 +485,9 @@ void blackjackGameLoop(){
     while (!choiceMade){
       if (get_btn()){
 
+        delay(200);
+        reset_btn();
+
         if (get_sw()%2 == 0){ // Play again
           print("Play again\n");
           choiceMade = 1;
@@ -551,6 +584,9 @@ void rouletteGameLoop(){
     while (!choiceMade){
       if (get_btn()){
 
+        delay(200);
+        reset_btn();
+
         if (get_sw()%2 == 0){ // Play again
           print("Play again\n");
           choiceMade = 1;
@@ -604,6 +640,7 @@ void letsPlay(){
   while (!request_reset) {
     if (get_btn()){
       delay(100);
+      reset_btn();
       if (get_sw()%2 == 0){       // Black jack
         blackjackGameLoop();
       }
@@ -647,13 +684,27 @@ void handle_interrupt(unsigned cause)
     }
   }
 
+  /*
   if (cause & IRQ_BTN){            // check if btn1 interrupt
     int inpEdge = BTN_EDGE;  // read which input caused the edge
     BTN_EDGE = inpEdge;      // clear it by writing 1s back
 
     if (inpEdge & 0x1) {        // check if btn1 (bit1) caused it
+      buttonIsPushed = 1;
     }
-  }
+  }*/
+  if (cause & IRQ_BTN){
+        int edges = BTN_EDGE;
+        BTN_EDGE = edges;                 // write-1-to-clear
+
+        if (edges & BTN_BIT){
+            int level = (BTN & BTN_BIT) ? 1 : 0;
+            if (level == 1 && last_level == 0) {    // active-high press only
+                buttonIsPushed = 1;
+            }
+            last_level = level;
+        }
+    }
 }
 
 /* Add your code here for initializing interrupts. */
@@ -666,6 +717,12 @@ void init(void) {
   enable_interrupts();
 
   video_init(320, 240);
+
+  /*
+    Reset button edge
+  */
+  int stale = BTN_EDGE;
+  BTN_EDGE = stale;
 }
 
 void video_init(int width, int height) {
