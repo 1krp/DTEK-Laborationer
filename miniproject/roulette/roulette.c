@@ -7,7 +7,7 @@ extern void set_displays(int display_number, int value);
 extern void reset_disp();
 extern void print(const char*);
 extern void print_dec(unsigned int);
-extern int get_btn(void);
+//extern int get_btn(void);
 extern int get_sw(void);
 extern int randFT(int from, int to);
 extern int nextprime( int );
@@ -80,6 +80,7 @@ void pickBets(){
   int choiceMade = 0;
   while(!choiceMade){
     if (get_btn()){
+      reset_btn();
       if (get_sw() == 0) {
         choiceMade = 1;
       } 
@@ -141,6 +142,7 @@ void pickBets(){
   choiceMade = 0;
   while(!choiceMade){
     if (get_btn()){
+      reset_btn();
       if (get_sw() < 10){
         betNum = get_sw();
 

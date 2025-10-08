@@ -387,6 +387,7 @@ int bjGameLoop() {
            int choiceMade = 0;
             while (!choiceMade){
                 if (get_btn()){
+                    reset_btn();
                     hitOrStand = get_sw()%2;
                     choiceMade = 1;
                 }
