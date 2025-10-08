@@ -72,33 +72,52 @@ void showStartRound(){
 */
 void pickBets(){
 
+  reset_disp();
+
   /*
     Odd or even
   */
-  reset_disp();
-  set_displays(5, 0);   // O (Odd)
-  set_displays(4, 1);   // 1
-  set_displays(1, 15);  // E (Even)
-  set_displays(0, 2);   // 2
-  delay(500);
-
   int choiceMade = 0;
   while(!choiceMade){
     if (get_btn()){
-      int choice = get_sw();
-
-      if (choice == 1){
-        betOdd = 1;
+      if (get_sw() == 0) {
         choiceMade = 1;
-      }
-      if (choice == 2){
+      } 
+      else if (get_sw()%2 == 0) {
         betEven = 1;
         choiceMade = 1;
       }
-      if (choice == 0){
+      else {
+        betOdd = 1;
         choiceMade = 1;
       }
     }
+
+    /*
+      Display current choice
+    */
+   if (get_sw() == 0){
+
+    set_displays(3, 35);
+    set_displays(2, 24);  // N
+    set_displays(1, 25);  // o
+    set_displays(0, 24);  // N
+
+   } else if (get_sw()%2 == 0){
+
+    set_displays(3, 15);  // E
+    set_displays(2, 31);  // V
+    set_displays(1, 15);  // E
+    set_displays(0, 24);  // N
+
+   } else {
+
+    set_displays(3, 35);
+    set_displays(2, 0);   // O
+    set_displays(1, 14);  // d
+    set_displays(0, 14);  // d
+
+   }
   }
 
   print("You picked: ");

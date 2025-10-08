@@ -138,6 +138,9 @@ void set_displays(int display_number, int value){
   if (value == 24){ // N
     sevSegVal = 0xC8;
   }
+  if (value == 25){ // o
+    sevSegVal = 0xA3;
+  }
   if (value == 26){ // P
     sevSegVal = 0x8C;
   }
@@ -221,6 +224,7 @@ void waitForButton(Command cmd){
       delay(200);
     }
   }
+  reset_disp();
 }
 
 /*
@@ -287,13 +291,13 @@ int makeBet(){
         print("Your bet: ");
         print_dec(bet);
         print("\n");
-        delay(1000);
+        delay(200);
 
         payroll -= bet;
         return bet;
       } else {
         print("Not enough money");
-        delay(500);
+        delay(200);
       }
     }
 
@@ -324,6 +328,17 @@ void displayPayroll(){
   set_displays(3, tens);
   set_displays(4, hundr);
   set_displays(5, thousn);
+}
+
+/*
+  Prints payroll in the console
+*/
+void printPayroll(){
+  print("----------\n");
+  print("Payroll: ");
+  print_dec(payroll);
+  print("\n");
+  print("----------\n\n");
 }
 
 /*
@@ -372,6 +387,8 @@ void blackjackGameLoop(){
     delay(100);
     int currBet = 0;
 
+    printPayroll();
+
     /*
       Start new round
     */
@@ -382,6 +399,7 @@ void blackjackGameLoop(){
       Play
     */
     int bjResult = bjGameLoop();
+    reset_disp();
 
     /*
       Evaluate result
@@ -428,6 +446,7 @@ void blackjackGameLoop(){
         Show payroll
     */
     displayPayroll();
+    printPayroll;
 
     /*
         Loop where player choose continue play or return to lobby
@@ -441,6 +460,7 @@ void blackjackGameLoop(){
           choiceMade = 1;
         } else if (get_sw()%2 == 1){ // Return to lobby
           print("Return to lobby\n");
+          displayBgImage(MainScreen_);
           choiceMade = 1;
           continueGame = 0;
         }
@@ -467,25 +487,47 @@ void rouletteGameLoop(){
 
   print("Time for roulette!\n\n");
 
+  continueGame = 1;
   while(continueGame){
+
+    displayBgImage(RouletteEmpty_);
 
     print("New round!\n\n");
     delay(100);
     int currBet = 0;
 
+    printPayroll();
+
     print("-- Make bet -- \n\n");
     currBet = makeBet();
 
     int win = playRound(currBet);
+    reset_disp();
 
+    /*
+      Evaluate result
+    */
     if (win > 0){
-      displayWinAmt(win);
-      payroll += win;
+
+      /*
+        Player wins
+      */
       print("You win: ");
       print_dec(win);
       print("\n");
+
+      displayWinAmt(win);
+      payroll += win;
+
+      displayBgImage(WinScreen_);
+
     } else {
+
+      /*
+        Player looses
+      */
       print("No wins..\n\n");
+      displayBgImage(LossScreen_);
     }
 
     /*
@@ -500,6 +542,7 @@ void rouletteGameLoop(){
         Show payroll
     */
     displayPayroll();
+    printPayroll;
 
     /*
         Loop where player choose continue play or return to lobby
@@ -513,6 +556,7 @@ void rouletteGameLoop(){
           choiceMade = 1;
         } else if (get_sw()%2 == 1){ // Return to lobby
           print("Return to lobby\n");
+          displayBgImage(MainScreen_);
           choiceMade = 1;
           continueGame = 0;
         }
@@ -552,6 +596,7 @@ void letsPlay(){
 
   reset_disp();
   displayBgImage(MainScreen_);
+  printPayroll();
 
   /*
     Loop where player chooses game
@@ -563,7 +608,6 @@ void letsPlay(){
         blackjackGameLoop();
       }
       else if (get_sw()%2 == 1){  // Roulette
-        displayBgImage(RouletteEmpty_);
         rouletteGameLoop();
       }
       delay(200); // Some delay time after player returns from game
@@ -622,6 +666,7 @@ void init(void) {
   enable_interrupts();
 
   video_init(320, 240);
+  //BTN_EDGE = 0x0;      // clear button edge TEST
 }
 
 void video_init(int width, int height) {

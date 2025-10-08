@@ -359,7 +359,7 @@ int bjGameLoop() {
         (Only count dealers shown card)
     */
     pHandValue = count_hand_value(pHand, HAND_SIZE);
-    dHandValue = count_hand_value(dHand, HAND_SIZE) - dHand[1].value;
+    dHandValue = count_hand_value(dHand, 1);
 
     print_cards(pHand, HAND_SIZE);
     print("Player hand value: ");
@@ -408,6 +408,8 @@ int bjGameLoop() {
                     set_displays(1, 14);    // D
                 }
             }
+
+            delay(500);
 
             if (hitOrStand == 0){ // Hit
 
@@ -497,12 +499,11 @@ int bjGameLoop() {
                 Evaluate round
             */
             round_status();
-            waitForButton(CMD_EVAL);
         }
     }
 
     print("\n--------------Round Over------------\n");
-
+    waitForButton(CMD_EVAL);
     print_winner();
 
     return roundStatus;

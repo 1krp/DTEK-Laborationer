@@ -4,7 +4,6 @@
 
 #define BGIMGSIZE 76800
 #define CARDIMGSIZE 1148
-#define FRAMESIZE 10
 
 void displayBgImage(unsigned char* img){
   for (int i = 0; i < BGIMGSIZE; i++){
