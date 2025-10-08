@@ -9,7 +9,6 @@ extern void set_displays(int display_number, int value);
 extern void reset_disp();
 extern void print(const char*);
 extern void print_dec(unsigned int);
-//extern int get_btn(void);
 extern int get_sw(void);
 extern int randFT(int from, int to);
 extern int nextprime( int );
@@ -157,7 +156,7 @@ void pickBets(){
 
         print("You picked: ");
         print_dec(betNum);
-        print("\n");
+        print("\n\n");
       }
       choiceMade = 1;
     }
@@ -292,7 +291,7 @@ int playRound(int bet){
   /*
     Start game
   */
-  print("Let's play!\n");
+  print("Let's play!\n\n");
   delay(500);
   showStartRound();
 
@@ -303,7 +302,7 @@ int playRound(int bet){
   showNumber(currNum);
   print("Landed on: ");
   print_dec(currNum);
-  print("\n");
+  print("\n\n");
 
   /*
     Evaluate current number

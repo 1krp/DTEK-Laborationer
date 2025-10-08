@@ -111,14 +111,8 @@ void fill_deck(Card *deck) {
             deck[i].value = (i % 13) + 2;
             deck[i].imgIndex = i;
         }
-        print(deck[i].suit);
-        print_dec(deck[i].value);
-        print(": ");
-        print_dec(deck[i].imgIndex);
-        print("\n");
 
     }
-    print("\n");
 }
 
 /*
@@ -167,6 +161,7 @@ void init_game(Card *pHand, Card *dHand, Card *deck) {
     */
     print("Player start hand: \n");
     deal_card(deck, pHand, 2);
+    print("\n");
     pCardCounter = 2;
 
     /*
@@ -209,18 +204,6 @@ void deal_card(Card *deck, Card *hand, int numOfCards) {
     for(int i = 0; i < 10; i++){
         if(hand[i].value == 0 && dealtCardsCounter < numOfCards){
 
-            print("Top of deck: ");
-            print_dec(topOfDeck);
-            print("\n");
-
-
-            print("Top card: ");
-            print_dec(deck[topOfDeck].imgIndex);
-            print(deck[topOfDeck].suit);
-            print(" ");
-            print_dec(deck[topOfDeck].value);
-            print("\n");
-
             hand[i].suit = deck[topOfDeck].suit;
             hand[i].value = deck[topOfDeck].value;
             hand[i].imgIndex = deck[topOfDeck].imgIndex;
@@ -229,7 +212,6 @@ void deal_card(Card *deck, Card *hand, int numOfCards) {
 
             // Print drawn card
             print("Drawn card: ");
-            print_dec(hand[i].imgIndex);
             print(hand[i].suit);
             print(" ");
             print_dec(hand[i].value);

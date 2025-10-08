@@ -386,7 +386,7 @@ void resetDisplays(){
 */
 void blackjackGameLoop(){
 
-  print("Time for bj!\n\n");
+  print("Time for Black Jack!\n\n");
 
   continueGame = 1;
   while(continueGame){
@@ -429,7 +429,7 @@ void blackjackGameLoop(){
       payroll += currBet*2;
       print("You win: ");
       print_dec(currBet*2);
-      print("\n");
+      print("\n\n");
 
     } else if (bjResult == 3){
 
@@ -440,7 +440,7 @@ void blackjackGameLoop(){
       payroll += currBet;
       print("Push: ");
       print_dec(currBet);
-      print("\n");
+      print("\n\n");
 
     } else {
 
@@ -448,7 +448,6 @@ void blackjackGameLoop(){
         Player loose
       */
       displayBgImage(LossScreen_);
-      print("No win..\n\n");
     }
 
     /*
