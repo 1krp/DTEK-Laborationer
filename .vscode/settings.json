@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "type_traits": "c",
-        "hw_regs.h": "c"
+        "hw_regs.h": "c",
+        "main.h": "c"
     }
 }

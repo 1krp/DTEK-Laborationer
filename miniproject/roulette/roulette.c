@@ -1,5 +1,7 @@
 #include "roulette.h"
 #include "../main.h"
+#include "../display.h"
+#include "../graphics/smallRoulettePxArrays.h"
 
 extern void delay(int);
 extern void set_leds(int led_mask);
@@ -20,6 +22,8 @@ extern int nextprime( int );
 /*
   Roulette globals
 */
+static int imageIndex = 0;
+
 static int betEven = 0;
 static int betOdd = 0;
 static int betNum = 10; // Default value anything > 9
@@ -39,6 +43,11 @@ void showNumber(int n){
     reset_disp();
     delay(200);
   }
+}
+
+void rouletteImage(){
+  displayRouletteImage(rouletteImageArr[imageIndex%11]);
+  imageIndex++;
 }
 
 /*
@@ -228,6 +237,7 @@ int spinWheel(){
       Switch to next lamp and wait delay ms
     */
     set_leds(lampBinV);
+    rouletteImage(); // Update roulette image
     delay(delayT);
 
     /*
