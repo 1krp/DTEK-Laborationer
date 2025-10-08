@@ -446,7 +446,7 @@ void blackjackGameLoop(){
         Show payroll
     */
     displayPayroll();
-    printPayroll;
+    printPayroll();
 
     /*
         Loop where player choose continue play or return to lobby
@@ -542,7 +542,7 @@ void rouletteGameLoop(){
         Show payroll
     */
     displayPayroll();
-    printPayroll;
+    printPayroll();
 
     /*
         Loop where player choose continue play or return to lobby
