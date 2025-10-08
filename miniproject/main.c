@@ -186,41 +186,22 @@ int get_sw(){
 }
 
 /*
-  Returns 
-  TRUE if button is pushed
-  FALSE if not
-*/
-/*
-int get_btn(){
-  if (buttonIsPushed) {
-    //buttonState ++;
-    delay(50);
-  }
-  if (buttonState != 0 && buttonState%2 == 0) {
-    buttonState = 0;
-    return 1;
-  }
-  return 0;
-  //return buttonIsPushed;
-}
+  Return TRUE if button is pushed, else FALSE
 */
 int get_btn(){
   return buttonIsPushed;
 }
+
+/*
+  Resets button state after each push
+*/
 void reset_btn(){
   buttonIsPushed = 0;
 }
-/*
-int get_btn(){
-  //return 0x1 & BTN;
-  int edges = BTN_EDGE;  // read latched edges
-  if (edges & BTN_BIT) {
-      BTN_EDGE = edges;  // clear by writing 1s back
-      return 1;
-  }
-  return 0;
-}*/
 
+/*
+
+*/
 void waitForButton(Command cmd){
 
   if (cmd == CMD_PUSH){
