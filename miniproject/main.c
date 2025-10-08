@@ -27,6 +27,8 @@ extern int randFT(int from, int to);
 static int payroll = 0;
 static int timerTOCounter = 0;
 static int secondCounter = 0;
+static int continueGame = 1;
+int choiceMade = 0;
 
 /*
   Sets payroll to v
@@ -106,6 +108,12 @@ void set_displays(int display_number, int value){
   if (value == 11){ // A
     sevSegVal = 0x88;
   }
+  if (value == 12){ // b
+    sevSegVal = 0x83;
+  }
+  if (value == 13){ // C
+    sevSegVal = 0xC6;
+  }
   if (value == 14){ // d
     sevSegVal = 0xA1;
   }
@@ -127,8 +135,14 @@ void set_displays(int display_number, int value){
   if (value == 26){ // P
     sevSegVal = 0x8C;
   }
+  if (value == 28){ // r
+    sevSegVal = 0xAF;
+  }
   if (value == 30){ // T
     sevSegVal = 0x8F;
+  }
+  if (value == 31){ // U
+    sevSegVal = 0xC1;
   }
   if (value == 34){ // Y
     sevSegVal = 0x8D;
@@ -297,12 +311,12 @@ void displayWinAmt(int n){
 /*
   Game loop Black Jack
 */
-int rg = 0;
 void blackjackGameLoop(){
 
   print("Time for bj!\n\n");
 
-  while(!rg){
+  continueGame = 1;
+  while(continueGame){
 
     print("New round!\n\n");
     delay(100);
@@ -330,23 +344,43 @@ void blackjackGameLoop(){
     /*
       Round finished
     */
-    set_leds(0x0);
     reset_disp();
+    delay(1000);
     print("Round finished\n");
 
-    int playAgain = 0;
-    while (!playAgain){
+    /*
+        Show payroll
+    */
+    displayPayroll();
+
+    /*
+        Loop where player choose continue play or return to lobby
+    */
+    choiceMade = 0;
+    while (!choiceMade){
+      if (get_btn()){
+
+        if (get_sw()%2 == 0){ // Play again
+          print("Play again\n");
+          choiceMade = 1;
+        } else if (get_sw()%2 == 1){ // Return to lobby
+          print("Return to lobby\n");
+          choiceMade = 1;
+          continueGame = 0;
+        }
+      }
 
       /*
-        Show payroll
+        Show current choice
       */
-      displayPayroll();
-
-      if (get_btn()){
-        print("Play again\n");
-        playAgain = 1;
+      if (get_sw()%2 == 0){
+        set_displays(0, 13); // "C" (Continue)
+      } else {
+        set_displays(0, 28);  // "r" (Return)
       }
+
     }
+    reset_disp();
   }
 }
 
@@ -357,7 +391,7 @@ void rouletteGameLoop(){
 
   print("Time for roulette!\n\n");
 
-  while(!rg){
+  while(continueGame){
 
     print("New round!\n\n");
     delay(100);
@@ -383,21 +417,42 @@ void rouletteGameLoop(){
     */
     set_leds(0x0);
     reset_disp();
+    delay(1000);
     print("Round finished\n\n");
 
-    int playAgain = 0;
-    while (!playAgain){
+    /*
+        Show payroll
+    */
+    displayPayroll();
+
+    /*
+        Loop where player choose continue play or return to lobby
+    */
+    choiceMade = 0;
+    while (!choiceMade){
+      if (get_btn()){
+
+        if (get_sw()%2 == 0){ // Play again
+          print("Play again\n");
+          choiceMade = 1;
+        } else if (get_sw()%2 == 1){ // Return to lobby
+          print("Return to lobby\n");
+          choiceMade = 1;
+          continueGame = 0;
+        }
+      }
 
       /*
-        Show payroll
+        Show current choice
       */
-      displayPayroll();
-
-      if (get_btn()){
-        print("Play again\n");
-        playAgain = 1;
+      if (get_sw()%2 == 0){
+        set_displays(0, 13); // "C" (Continue)
+      } else {
+        set_displays(0, 28);  // "r" (Return)
       }
+      
     }
+    reset_disp();
   }
 }
 
@@ -412,30 +467,45 @@ void resetGame(){
   reset_disp();
   print("Game reset\n\n");
 
+  displayBgImage(MainScreen_);
+
   letsPlay();
 }
 
 /*
-  Choose game procedure
+  Lobby
 */
 void letsPlay(){
 
   reset_disp();
-  set_displays(5, 1);
-  set_displays(0, 2);
+  displayBgImage(MainScreen_);
 
+  /*
+    Loop where player chooses game
+  */
   while (1) {
     if (get_btn()){
       delay(100);
-      if (get_sw() == 1){ // Roulette
-        displayBgImage(RouletteEmpty_);
-        rouletteGameLoop();
-      }
-      if (get_sw() == 2){ // Black jack
+      if (get_sw()%2 == 0){       // Black jack
         displayBgImage(BJTable_);
         blackjackGameLoop();
       }
+      else if (get_sw()%2 == 1){  // Roulette
+        displayBgImage(RouletteEmpty_);
+        rouletteGameLoop();
+      }
+      delay(200); // Some delay time after player returns from game
     }
+
+    /*
+      Show current choice
+    */
+    if (get_sw()%2 == 0){
+      set_displays(0, 12); // "b" (Continue)
+    } else {
+      set_displays(0, 28);  // "r" (Return)
+    }
+
   }
 }
 
@@ -510,6 +580,11 @@ int main() {
       delay(100);
       cont = 1;
     }
+
+    set_displays(5, 26);  // P
+    set_displays(4, 31);  // U
+    set_displays(3, 5);   // S
+    set_displays(2, 18);  // H
   }
 
   makePayment();

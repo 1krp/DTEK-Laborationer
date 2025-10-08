@@ -324,12 +324,17 @@ int bjGameLoop() {
     /*
         Wait for player to start (push btn)
     */
-    int started = 0;
-    while (!started){
+    int pushed = 0;
+    while (!pushed){
         if (get_btn()){
             delay(100);
-            started = 1;
+            pushed = 1;
         }
+
+        set_displays(5, 14);  // D
+        set_displays(4, 15);  // E
+        set_displays(3, 11);  // A
+        set_displays(2, 22);  // L
     }
 
     init_game(pHand, dHand, deck);
