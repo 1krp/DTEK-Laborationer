@@ -246,15 +246,40 @@ void makePayment(){
   set_displays(3, 34);  // Y
   set_displays(0, 1);
 
-  int paymentDone = 0;
-  while (!paymentDone) {
+  /*
+  while (!get_btn()){
+
+    
+    int currentPayment = get_sw();
+    int currOnes = currentPayment%10;
+    int currTens = ((currentPayment-currOnes)%100)/10;
+    int currHundr = ((currentPayment-currOnes-currTens)%1000)/100;
+    set_displays(2, currHundr);
+    set_displays(1, currTens);
+    set_displays(0, currOnes);
+  }
+
+  delay(100);
+  reset_btn();
+
+  payroll = get_sw();
+      
+  reset_disp();
+  displayPayroll();
+  print("Payment received: ");
+  print_dec(payroll);
+  print("\n");
+  */
+
+  //int paymentDone = 0;
+  while (!payroll) {
 
     if (get_btn()){
       delay(100);
       reset_btn();
 
       payroll = get_sw();
-      paymentDone = 1;
+      //paymentDone = 1;
       
       reset_disp();
       displayPayroll();
@@ -266,10 +291,11 @@ void makePayment(){
     /*
       Show current switch number
     */
-    int currentPayment = get_sw();
-    int currOnes = currentPayment%10;
-    int currTens = ((currentPayment-currOnes)%100)/10;
-    int currHundr = ((currentPayment-currOnes-currTens)%1000)/100;
+    
+    int currentSw = get_sw();
+    int currOnes = currentSw%10;
+    int currTens = ((currentSw-currOnes)%100)/10;
+    int currHundr = ((currentSw-currOnes-currTens)%1000)/100;
     set_displays(2, currHundr);
     set_displays(1, currTens);
     set_displays(0, currOnes);
@@ -594,19 +620,6 @@ void rouletteGameLoop(){
 }
 
 /*
-  Resets game
-
-  Called from interrupt handler when switch #10 is flicked
-*/
-void resetGame(){
-
-  set_leds(0x0);
-  print("Game reset\n\n");
-
-  letsPlay();
-}
-
-/*
   Lobby
 */
 void letsPlay(){
@@ -622,11 +635,11 @@ void letsPlay(){
     if (get_btn()){
       delay(100);
       reset_btn();
-      if (get_sw()%2 == 0){       // Black jack
-        blackjackGameLoop();
-      }
-      else if (get_sw()%2 == 1){  // Roulette
+      if (get_sw()%2 == 0){       // Roulette
         rouletteGameLoop();
+      }
+      else if (get_sw()%2 == 1){  // Black jack
+        blackjackGameLoop();
       }
       delay(200); // Some delay time after player returns from game
     }
@@ -635,11 +648,10 @@ void letsPlay(){
       Show current choice
     */
     if (get_sw()%2 == 0){
-      set_displays(0, 12);  // "b" (Continue)
+      set_displays(0, 28);  // "r" (Roulette)
     } else {
-      set_displays(0, 28);  // "r" (Return)
+      set_displays(0, 12);  // "b" (Black Jack)
     }
-
   }
 }
 
@@ -665,15 +677,6 @@ void handle_interrupt(unsigned cause)
     }
   }
 
-  /*
-  if (cause & IRQ_BTN){            // check if btn1 interrupt
-    int inpEdge = BTN_EDGE;  // read which input caused the edge
-    BTN_EDGE = inpEdge;      // clear it by writing 1s back
-
-    if (inpEdge & 0x1) {        // check if btn1 (bit1) caused it
-      buttonIsPushed = 1;
-    }
-  }*/
   if (cause & IRQ_BTN){
         int edges = BTN_EDGE;
         BTN_EDGE = edges;                 // write-1-to-clear
@@ -734,6 +737,7 @@ int main() {
       Reset reset button
     */
     request_reset = 0;
+    payroll = 0;
 
     /*
       Make deposit
