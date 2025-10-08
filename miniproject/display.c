@@ -4,6 +4,7 @@
 
 #define BGIMGSIZE 76800
 #define CARDIMGSIZE 1148
+#define ROULETTESIZE 32760
 
 void displayBgImage(unsigned char* img){
   for (int i = 0; i < BGIMGSIZE; i++){
@@ -26,4 +27,25 @@ void displayCardImage(int x, int y, unsigned char* img){
         i += 320 - 28;
     }
   }
+}
+
+void displayRouletteImage(unsigned char* img) {
+
+  int x = 72;
+  int y = 52;
+  int width = 180;
+
+  int cardInd = 0;
+  int i = y*320+x;
+
+  while (cardInd < ROULETTESIZE) {
+    if( (i%320) - x < width){
+        VGA_FB[i] = img[cardInd];
+        cardInd ++;
+        i++;
+    }else{
+        i += 320 - width;
+    }
+  }
+
 }
