@@ -30,11 +30,11 @@ static int secondCounter = 0;
 static int continueGame = 1;
 int choiceMade = 0;
 static int buttonPushed;
+volatile int request_reset = 0;
 
-/*
-  Commands
-*/
-//typedef enum { CMD_PUSH, CMD_DEAL, CMD_EVAL } Command;
+#define IRQ_TIMER   0x10
+#define IRQ_SWITCH  0x11
+#define IRQ_BTN     0x12
 
 /*
   Sets payroll to v
@@ -601,7 +601,7 @@ void letsPlay(){
   /*
     Loop where player chooses game
   */
-  while (1) {
+  while (!request_reset) {
     if (get_btn()){
       delay(100);
       if (get_sw()%2 == 0){       // Black jack
@@ -628,7 +628,7 @@ void letsPlay(){
 /* Below is the function that will be called when an interrupt is triggered. */
 void handle_interrupt(unsigned cause) 
 {
-  if (cause & 0x10){            // check if timer interrupt
+  if (cause & IRQ_TIMER){            // check if timer interrupt
     TMR1_SR = TMR1_SR & 0xE; 
     timerTOCounter ++;
 
@@ -638,19 +638,19 @@ void handle_interrupt(unsigned cause)
     }
   }
 
-  if (cause == 0x11){           // check if switch interrupt
-    int edge = SW_EDGE ;      // read which switch caused the edge
-    SW_EDGE  = edge;          // clear it by writing 1s back
-    delay(100);
-    if (edge & 0x200) {           // check if switch #10 (bit10) caused it
-      resetGame();
+  if (cause & IRQ_SWITCH){     // check if switch interrupt
+    int edges = SW_EDGE ;      // read which switch caused the edge
+    SW_EDGE  = edges;          // clear it by writing 1s back
+        
+    if (edges & (1 << 9)) {   // check if switch #10 (bit10) caused it
+      request_reset = 1;
     }
   }
 
-  if (cause == 0x12){            // check if btn1 interrupt
+  if (cause & IRQ_BTN){            // check if btn1 interrupt
     int inpEdge = BTN_EDGE;  // read which input caused the edge
     BTN_EDGE = inpEdge;      // clear it by writing 1s back
-    delay(100);
+
     if (inpEdge & 0x1) {        // check if btn1 (bit1) caused it
     }
   }
@@ -666,7 +666,6 @@ void init(void) {
   enable_interrupts();
 
   video_init(320, 240);
-  //BTN_EDGE = 0x0;      // clear button edge TEST
 }
 
 void video_init(int width, int height) {
@@ -679,13 +678,12 @@ void video_init(int width, int height) {
     // 3) Request a swap so DMA starts reading from that base
     VGA_CTRL[REG_BUFFER] = 0;
 
-    // 4) Wait until the swap completes (optional but tidy)
-    while (VGA_CTRL[REG_STATUS] & 1) { /* spin */ }
+    // 4) Wait until the swap completes
+    while (VGA_CTRL[REG_STATUS] & 1) {}
 }
 
 /* Your code goes into main as well as any needed functions. */
 int main() {
-
   init();
   reset_disp();
 
@@ -693,6 +691,21 @@ int main() {
 
   waitForButton(CMD_PUSH);
 
-  makePayment();
-  letsPlay();
+  while (1){
+    /*
+      Reset reset button
+    */
+    request_reset = 0;
+
+    /*
+      Make deposit
+    */
+    makePayment();
+
+    /*
+      Game loop until player request reset
+    */
+    letsPlay();
+  }
+  
 }
