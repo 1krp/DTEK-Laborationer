@@ -29,6 +29,12 @@ static int timerTOCounter = 0;
 static int secondCounter = 0;
 static int continueGame = 1;
 int choiceMade = 0;
+static int buttonPushed;
+
+/*
+  Commands
+*/
+//typedef enum { CMD_PUSH, CMD_DEAL, CMD_EVAL } Command;
 
 /*
   Sets payroll to v
@@ -181,6 +187,42 @@ int get_btn(){
   return 0x1 & BTN;
 }
 
+void waitForButton(Command cmd){
+
+  if (cmd == CMD_PUSH){
+    set_displays(5, 26);  // P
+    set_displays(4, 31);  // U
+    set_displays(3, 5);   // S
+    set_displays(2, 18);  // H
+    set_displays(1, 35);
+    set_displays(0, 35);
+  }
+  if (cmd == CMD_DEAL){
+    set_displays(5, 14);  // D
+    set_displays(4, 15);  // E
+    set_displays(3, 11);  // A
+    set_displays(2, 22);  // L
+    set_displays(1, 35);
+    set_displays(0, 35);
+  }
+  if (cmd == CMD_EVAL){
+    set_displays(5, 15);  // E
+    set_displays(4, 31);  // V
+    set_displays(3, 11);  // A
+    set_displays(2, 22);  // L
+    set_displays(1, 35);
+    set_displays(0, 35);
+  }
+
+  buttonPushed = 0;
+  while (!buttonPushed){
+    if (get_btn()){
+      buttonPushed = 1;
+      delay(200);
+    }
+  }
+}
+
 /*
   Make payment to payroll procedure
 */
@@ -318,26 +360,60 @@ void blackjackGameLoop(){
   continueGame = 1;
   while(continueGame){
 
+    /*
+      Set background
+    */
+    displayBgImage(BJTable_);
+
+    /*
+      Start new round
+    */
     print("New round!\n\n");
     delay(100);
     int currBet = 0;
 
+    /*
+      Start new round
+    */
     print("-- Make bet -- \n\n");
     currBet = makeBet();
 
+    /*
+      Play
+    */
     int bjResult = bjGameLoop();
 
+    /*
+      Evaluate result
+    */
     if (bjResult == 1){
+      
+      /*
+        Player wins
+      */
+      displayBgImage(WinScreen_);
       payroll += currBet*2;
       print("You win: ");
       print_dec(currBet*2);
       print("\n");
+
     } else if (bjResult == 3){
+
+      /*
+        Tie
+      */
+      displayBgImage(PushScreen_);
       payroll += currBet;
       print("Push: ");
       print_dec(currBet);
       print("\n");
+
     } else {
+
+      /*
+        Player loose
+      */
+      displayBgImage(LossScreen_);
       print("No win..\n\n");
     }
 
@@ -464,10 +540,7 @@ void rouletteGameLoop(){
 void resetGame(){
 
   set_leds(0x0);
-  reset_disp();
   print("Game reset\n\n");
-
-  displayBgImage(MainScreen_);
 
   letsPlay();
 }
@@ -487,7 +560,6 @@ void letsPlay(){
     if (get_btn()){
       delay(100);
       if (get_sw()%2 == 0){       // Black jack
-        displayBgImage(BJTable_);
         blackjackGameLoop();
       }
       else if (get_sw()%2 == 1){  // Roulette
@@ -501,7 +573,7 @@ void letsPlay(){
       Show current choice
     */
     if (get_sw()%2 == 0){
-      set_displays(0, 12); // "b" (Continue)
+      set_displays(0, 12);  // "b" (Continue)
     } else {
       set_displays(0, 28);  // "r" (Return)
     }
@@ -573,19 +645,8 @@ int main() {
   reset_disp();
 
   displayBgImage(MainScreen_);
-  
-  int cont = 0;
-  while (!cont) {
-    if (get_btn()){
-      delay(100);
-      cont = 1;
-    }
 
-    set_displays(5, 26);  // P
-    set_displays(4, 31);  // U
-    set_displays(3, 5);   // S
-    set_displays(2, 18);  // H
-  }
+  waitForButton(CMD_PUSH);
 
   makePayment();
   letsPlay();

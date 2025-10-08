@@ -6,3 +6,5 @@ int get_btn();
 int get_sw();
 void set_displays(int display_number, int value);
 void reset_disp();
+void waitForButton();
+typedef enum { CMD_PUSH, CMD_DEAL, CMD_EVAL } Command;
