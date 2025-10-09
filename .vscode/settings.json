@@ -2,6 +2,8 @@
     "files.associations": {
         "type_traits": "c",
         "hw_regs.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "bgpxarrays2.h": "c",
+        "smallroulettepxarrays1.h": "c"
     }
 }

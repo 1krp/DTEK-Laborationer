@@ -1,11 +1,7 @@
-/* main.c
+#include "bgPxArrays2.h"
+#include "smallRoulettePxArrays1.h"
+#include "hw_regs.h"
 
-   This file written 2024 by Artur Podobas and Pedro Antunes
-
-   For copyright and licensing, see file COPYING */
-
-
-/* Below functions are external and found in other files. */
 
 extern void print(const char*);
 extern void print_dec(unsigned int);
@@ -15,232 +11,121 @@ extern void tick(int*);
 extern void delay(int);
 extern int nextprime( int );
 
-int mytime = 0x5957;
-char textstring[] = "text, more text, and even more text!";
+int imageIndex = 0;
 
-void set_leds(int led_mask){
-  volatile int* ledPtr = 0x04000000;
-  *ledPtr = led_mask;
-}
+static int payroll = 0;
+static int timerTOCounter = 0;
+static int secondCounter = 0;
+static int continueGame = 1;
+int choiceMade = 0;
+volatile int request_reset = 0;
 
-void sec_leds(int led_mask){
-  volatile int* ledPtr = 0x04000000;
+#define IRQ_TIMER   0x10
+#define IRQ_SWITCH  0x11
+#define IRQ_BTN     0x12
+#define BTN_BIT     0x1
+#define PRESSED_IS_1 0 
 
-  for (int i = 0; i < led_mask;i++){
+volatile int last_level = 0;
+volatile int buttonIsPushed = 0;
 
-    delay(1100);
+#define BGIMGSIZE 76800
+#define CARDIMGSIZE 1148
+#define ROULETTESIZE 32760
 
-    *ledPtr = i;
+void displayBgImage(unsigned char* img){
+  for (int i = 0; i < BGIMGSIZE; i++){
+    VGA_FB[i] = img[i];
   }
 }
+//X is px from left
+//Y is px from top
+void displayCardImage(int x, int y, unsigned char* img){
 
-void reset_disp(){
+  int cardInd = 0;
+  int i = y*320+x;
 
-  volatile char* sevSegPtr = (volatile char*)0x04000050;
-
-  for (int i = 0; i < 6;i++){
-    *sevSegPtr = 0xFFFF;
-    sevSegPtr += 0x10;
-  }
-}
-
-void set_displays(int display_number, int value){
-
-  volatile char* sevSegPtr = (volatile char*)0x04000050;
-
-  /*
-    Pick chosen display
-  */
-  for (int i = 1; i < display_number;i++){
-    sevSegPtr += 0x10;
-  }
-
-  if (value == 0){
-    *sevSegPtr = 0xC0;
-  }
-  if (value == 1){
-    *sevSegPtr = 0xF9;
-  }
-  if (value == 2){
-    *sevSegPtr = 0xA4;
-  }
-  if (value == 3){
-    *sevSegPtr = 0xB0;
-  }
-  if (value == 4){
-    *sevSegPtr = 0x99;
-  }
-  if (value == 5){
-    *sevSegPtr = 0x92;
-  }
-  if (value == 6){
-    *sevSegPtr = 0x82;
-  }
-  if (value == 7){
-    *sevSegPtr = 0xF8;
-  }
-  if (value == 8){
-    *sevSegPtr = 0x80;
-  }
-  if (value == 9){
-    *sevSegPtr = 0x90;
-  }
-  if (value == 10){
-    *sevSegPtr = 0xBF;
-  }
-
-  /*
-    Show dots on display 5 and 3
-  */
-  if (display_number == 5 || display_number == 3){
-    *sevSegPtr -= 0x80;
-  } 
-}
-
-int sec_counter = 0;
-int min_counter = 0;
-int hr_counter = 0;
-
-void clock_counter(){
-
-  delay(200);
-
-  sec_counter++;
-
-  if (sec_counter >= 60){
-    min_counter ++;
-    sec_counter = 0;
-  }
-  if (min_counter >= 60){
-    hr_counter ++;
-    min_counter = 0;
-  }
-}
-
-void display_time(){
-  int sec_ones = 0;
-  int sec_tens = 0;
-  int min_ones = 0;
-  int min_tens = 0;
-  int hr_ones = 0;
-  int hr_tens = 0;
-
-  sec_ones = sec_counter%10;
-  sec_tens = sec_counter / 10;
-  min_ones = min_counter%10;
-  min_tens = min_counter / 10;
-  hr_ones = hr_counter%10;
-  hr_tens = hr_counter / 10;
-
-  set_displays(1, sec_ones);
-  set_displays(2, sec_tens);
-  set_displays(3, min_ones);
-  set_displays(4, min_tens);
-  set_displays(5, hr_ones);
-  set_displays(6, hr_tens);
-}
-
-int get_sw(){
-  volatile int* swPtr = (volatile int*)0x04000010;
-  unsigned int retVal = *swPtr;
-  return retVal;
-}
-
-int get_btn(){
-  volatile int* btnPtr = (volatile int*)0x040000d0;
-  return 0x1 & *btnPtr;
-}
-
-int l = 1;
-int decrease = 0;
-
-void ledFun(){
-  set_leds(l);
-
-  if (!decrease) {
-    l = l*2;
-  } else {
-    l = l/2;
-  }
-
-  if (l >= 512){
-    decrease = 1;
-  }
-  if (decrease && l <= 1) {
-    decrease = 0;
-  }
-}
-
-/* Below is the function that will be called when an interrupt is triggered. */
-void handle_interrupt(unsigned cause) 
-{}
-
-/* Add your code here for initializing interrupts. */
-void labinit(void)
-{}
-
-/* Your code goes into main as well as any needed functions. */
-int main() {
-  // Call labinit()
-  labinit();
-
-  reset_disp();
-
-  // c)
-  //set_leds(0x7);
-
-  // d)
-  /*
-  short mask = 0x0;
-  for (int i = 0; i < 16;i++){
-    set_leds(mask);
-    delay(1100);
-    mask ++;
-  }*/
-  
-
-  // h
-  
-  while (1){
-    
-    if (get_btn()){
-
-      int twoOnes = 0x3;
-      int sixOnes = 0x3F;
-
-      unsigned int andi1 = (get_sw() >> 8) & twoOnes;
-      unsigned int andi2 = get_sw() & sixOnes;
-
-      if (andi1 == 1){ //sec
-
-        int upd_sec = get_sw() & sixOnes;
-        sec_counter = upd_sec;
-      } else if (andi1 == 2){ //min
-
-        int upd_min = get_sw() & sixOnes;
-        min_counter = upd_min;
-
-      } else if (andi1 == 3){ //hr
-        int upd_hr = get_sw() & sixOnes;
-        hr_counter = upd_hr;
-      }
+  while (cardInd < CARDIMGSIZE) {
+    if( (i%320) - x < 28){
+        VGA_FB[i] = img[cardInd];
+        cardInd ++;
+        i++;
+    }else{
+        i += 320 - 28;
     }
-    clock_counter();
-    display_time();
+  }
+}
 
-    ledFun();
+void displayRouletteImage(unsigned char* img) {
+
+  int x = 72;
+  int y = 52;
+  int width = 180;
+
+  int cardInd = 0;
+  int i = y*320+x;
+
+  while (cardInd < ROULETTESIZE) {
+    if( (i%320) - x < width){
+        VGA_FB[i] = img[cardInd];
+        cardInd ++;
+        i++;
+    }else{
+        i += 320 - width;
+    }
+  }
+}
+
+void rouletteImage(){
+  displayRouletteImage(rouletteImageArr[imageIndex%11]);
+  imageIndex++;
+}
+
+
+void handle_interrupt(unsigned cause) 
+{
+  if (cause & IRQ_TIMER){            // check if timer interrupt
+    TMR1_SR = TMR1_SR & 0xE; 
+    timerTOCounter ++;
+
+    if (timerTOCounter >= 10){
+      timerTOCounter = 0;
+      secondCounter ++;
+    }
   }
 
-  //LEDSwitch(20);
+  if (cause & IRQ_SWITCH){     // check if switch interrupt
+    int edges = SW_EDGE ;      // read which switch caused the edge
+    SW_EDGE  = edges;          // clear it by writing 1s back
+        
+    if (edges & (1 << 9)) {   // check if switch #10 (bit10) caused it
+      request_reset = 1;
+    }
+  }
 
-  // Enter a forever loop
-  /*
-  while (1) {
-    time2string( textstring, mytime ); // Converts mytime to string
-    display_string( textstring ); //Print out the string 'textstring'
-    delay( 1100 );          // Delays 1 sec (adjust this value)
-    tick( &mytime );     // Ticks the clock once
-  }*/
+  if (cause & IRQ_BTN){
+        int edges = BTN_EDGE;
+        BTN_EDGE = edges;                 // write-1-to-clear
+
+        if (edges & BTN_BIT){
+            int level = (BTN & BTN_BIT) ? 1 : 0;
+            if (level == 1 && last_level == 0) {    // active-high press only
+                buttonIsPushed = 1;
+            }
+            last_level = level;
+        }
+    }
+}
+
+
+
+
+int main() {
+  displayBgImage(RouletteEmpty_);
+  while(1){
+    rouletteImage();
+    delay(100);
+  }
 }
 
 
